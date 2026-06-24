@@ -2,13 +2,13 @@
 
 ## Goal
 
-把当前 `vrc-blocker` 从“已初始化 Tauri/Rust 骨架 + 已迁入 UI prototype”的状态推进到完整可执行、可运行、可验收的独立 VRChat 屏蔽工具。
+把当前 `vrc-blocker` 从“已初始化 Tauri/Rust 骨架 + 已按 UI prototype 适配运行版前端”的状态推进到完整可执行、可运行、可验收的独立 VRChat 屏蔽工具。
 
 完成状态定义：
 
 - Windows、macOS、Linux 至少能在 GitHub Actions 产出可下载构建产物。
 - macOS 本机能运行 debug build。
-- 前端 prototype 的所有关键入口都接到真实 Tauri commands，不再依赖 mock `setTimeout` 数据。
+- 运行版前端的所有关键入口都接到真实 Tauri commands，不再依赖 mock `setTimeout` 数据。
 - 能用 VRChat 登录或本机 VRCX Cookie 建立会话。
 - 能导入 `uid,memo` CSV，编辑/跳过条目，确认后执行屏蔽并覆盖写入在线 `userNotes`。
 - 能处理已屏蔽玩家：仍覆盖备注，block 验证通过后记为 `already_blocked`。
@@ -59,12 +59,14 @@
 
 ### 1. Frontend Wiring
 
-- 把 `public/index.html` 中的 mock manifest 数据替换为 command 返回值。
-- 登录弹窗接 `login` / `verify_two_factor` / `logout` / `get_session_status`。
-- 导入按钮接文件选择和 CSV parser。
-- 编辑页保留前端内存编辑，提交前生成 `StartRunRequest`。
+- 已把 prototype 拆分并适配为 `public/index.html`、`public/styles.css`、`public/app.js`。
+- 已隐藏 Tauri 原生标题栏，使用自定义可拖动标题栏和窗口控制按钮。
+- 已把导入按钮接文件选择和 CSV parser。
+- 已把登录弹窗接 `login` / `verify_two_factor` / `logout` / `get_session_status`，但后端登录仍是 scaffold。
+- 已让编辑页保留前端内存编辑，提交前生成 `StartRunRequest`。
+- 已接 dry-run 报告页到 `start_block_run` scaffold。
 - 执行页订阅 `run:progress`、`run:log`、`run:backoff`、`run:finished`、`run:aborted`。
-- 报告页使用真实 `RunReport`。
+- 真实网络执行接线完成后，报告页继续使用真实 `RunReport`。
 
 ### 2. VRChat Session
 

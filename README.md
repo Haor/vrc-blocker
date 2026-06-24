@@ -14,12 +14,12 @@
 
 ## 当前骨架
 
-- `public/index.html`：从当前 UI prototype 迁入的单文件静态界面。
+- `public/`：按 UI prototype 适配后的 Tauri 静态前端，包含自定义可拖动标题栏、CSV 导入、编辑、确认和 dry-run 报告入口。
 - `src-tauri/src/commands/`：前端可调用的 Tauri commands。
 - `src-tauri/src/vrchat/`：VRChat API client 边界。
 - `src-tauri/src/import/`：CSV 解析与校验。
 - `src-tauri/src/run_engine/`：执行报告与退避策略入口。
-- `docs/`：后端契约、报告 JSON、限速退避说明。
+- `docs/`：后端契约、报告 JSON、限速退避说明、原型参考。
 - `examples/example.csv`：脱敏示例 CSV。
 - `.github/workflows/`：跨平台测试和多平台 Tauri 构建。
 

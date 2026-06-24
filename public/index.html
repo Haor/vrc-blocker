@@ -1,850 +1,261 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>vrc-blocker · UI 原型</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-<style>
-/* =========================================================================
-   vrc-blocker — 视觉语言对齐 DESIGN-cursor.md
-   暖奶油画布 · Cursor 橙 · Inter + JetBrains Mono · 发丝线无阴影 · 时间线柔彩
-   ========================================================================= */
-:root{
-  /* brand & accent */
-  --primary:#f54e00; --primary-active:#d04200; --on-primary:#ffffff;
-  /* surface */
-  --canvas:#f7f7f4; --canvas-soft:#fafaf7; --card:#ffffff; --surface-strong:#e6e5e0;
-  /* hairline */
-  --hairline:#e6e5e0; --hairline-soft:#efeee8; --hairline-strong:#cfcdc4;
-  /* text */
-  --ink:#26251e; --body:#5a5852; --muted:#807d72; --muted-soft:#a09c92;
-  /* semantic */
-  --success:#1f8a65; --error:#cf2d56; --gold:#c08532;
-  --success-soft:#e1f0ea; --error-soft:#fbe3e9; --gold-soft:#f4e7d2; --primary-soft:#fde7dd;
-  /* timeline pastels (signature — 仅用于执行时间线) */
-  --tl-thinking:#dfa88f; --tl-grep:#9fc9a2; --tl-read:#9fbbe0; --tl-edit:#c0a8dd; --tl-done:#c08532;
-  /* type */
-  --sans:"Inter", system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  /* radius */
-  --r-xs:4px; --r-sm:6px; --r-md:8px; --r-lg:12px; --r-pill:9999px;
-  --ease-out:cubic-bezier(.2,.7,.2,1);
-}
-*{box-sizing:border-box;}
-html,body{height:100%;margin:0;}
-body{
-  font-family:var(--sans); font-size:14px; line-height:1.5; color:var(--body);
-  -webkit-font-smoothing:antialiased;
-}
-@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.mono{font-family:var(--mono);}
-.cap{font-size:11px;font-weight:600;letter-spacing:.88px;text-transform:uppercase;color:var(--muted);}
-
-/* ============================== DESKTOP =============================== */
-.desktop{height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;
-  background:
-    radial-gradient(1100px 760px at 26% 18%, rgba(255,255,255,.5), transparent 60%),
-    linear-gradient(135deg,#c9ccc6 0%,#d9d3c7 48%,#cdc8bd 100%);}
-
-/* ============================== WINDOW =============================== */
-.app{width:min(1100px,96vw);height:min(740px,94vh);display:flex;flex-direction:column;position:relative;
-  background:var(--card);border-radius:13px;overflow:hidden;border:1px solid rgba(38,37,30,.10);
-  box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 28px 70px -18px rgba(38,37,30,.45), 0 8px 22px -12px rgba(38,37,30,.3);}
-
-/* ---- titlebar (macOS traffic lights) ---- */
-.titlebar{height:42px;flex:none;display:flex;align-items:center;padding:0 14px;position:relative;
-  background:var(--canvas-soft);border-bottom:1px solid var(--hairline);}
-.lights{display:flex;gap:8px;}
-.tl{width:12px;height:12px;border-radius:50%;}
-.tl.c{background:#ff5f57;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12);}
-.tl.y{background:#febc2e;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12);}
-.tl.g{background:#28c840;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12);}
-.wtitle{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;
-  font-size:12.5px;font-weight:500;color:var(--muted);}
-.wtitle .logo{color:var(--primary);font-size:14px;}
-.wtitle .wv{font-family:var(--mono);font-size:11px;color:var(--muted-soft);}
-
-/* ---- shell (sidebar + main) ---- */
-.shell{flex:1;min-height:0;display:grid;grid-template-columns:212px 1fr;}
-
-/* ---- sidebar (light editorial rail) ---- */
-.side{background:var(--canvas-soft);border-right:1px solid var(--hairline);display:flex;flex-direction:column;min-height:0;}
-
-.acct{margin:16px 14px 6px;}
-.acctIn{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--card);
-  border:1px solid var(--hairline);border-radius:var(--r-lg);animation:in .2s var(--ease-out);}
-.acctMain{flex:1;min-width:0;}
-.acct.out .acctIn{display:none;}
-.acct:not(.out) .acctOut{display:none;}
-.acctOut{appearance:none;width:100%;border:1px dashed var(--hairline-strong);background:var(--card);
-  color:var(--body);border-radius:var(--r-lg);padding:11px;font-family:var(--sans);font-size:13px;font-weight:500;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;
-  transition:border-color .14s var(--ease-out),color .14s var(--ease-out),background .14s var(--ease-out);}
-.acctOut:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-soft);}
-.acct .nm{font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px;font-size:13px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.acct .dot{width:7px;height:7px;border-radius:50%;background:var(--success);flex:none;}
-.acct .dot.off{background:var(--muted-soft);}
-.acct .dot.warn{background:var(--gold);}
-.acct .uid{font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--mono);}
-
-.side-label{padding:14px 18px 4px;font-size:10.5px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;color:var(--muted-soft);}
-.nav{padding:2px 14px;display:flex;flex-direction:column;gap:2px;}
-.nitem{display:flex;align-items:center;gap:10px;width:100%;text-align:left;appearance:none;background:none;border:none;
-  font-family:var(--sans);font-size:14px;font-weight:500;color:var(--body);padding:9px 12px;border-radius:var(--r-md);
-  cursor:pointer;transition:background .12s var(--ease-out),color .12s var(--ease-out);}
-.nitem .g{color:var(--muted-soft);font-size:12px;width:14px;}
-.nitem:hover{background:var(--surface-strong);color:var(--ink);}
-.nitem.active{background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 1px var(--hairline);}
-.nitem.active .g{color:var(--primary);}
-
-/* ---- sidebar footer (bottom-anchored utility) ---- */
-.side-foot{margin-top:auto;padding:12px;border-top:1px solid var(--hairline);display:flex;flex-direction:column;gap:1px;}
-.sf-link{appearance:none;background:none;border:none;text-align:left;font-family:var(--sans);font-size:13px;
-  color:var(--body);padding:7px 12px;border-radius:var(--r-md);cursor:pointer;transition:background .12s,color .12s;}
-.sf-link:hover{background:var(--surface-strong);color:var(--ink);}
-.sf-ver{padding:6px 12px 2px;font-size:11px;color:var(--muted-soft);font-family:var(--mono);}
-
-/* ---- main ---- */
-.main{overflow:auto;min-height:0;padding:28px 32px;display:flex;flex-direction:column;}
-.screen{display:none;animation:in .24s var(--ease-out);max-width:880px;width:100%;}
-.screen.active{display:flex;flex-direction:column;flex:1;min-height:0;}
-.h{display:flex;align-items:center;gap:12px;margin:0 0 6px;}
-.h h1{font-size:24px;margin:0;font-weight:400;letter-spacing:-.6px;color:var(--ink);}
-.lead{color:var(--body);font-size:14px;margin:0 0 24px;max-width:64ch;}
-
-/* ---- page head (title + inline actions) + filling list panel ---- */
-.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px;}
-.page-head .lead{margin:6px 0 0;}
-.page-head h1{font-size:24px;margin:0;font-weight:400;letter-spacing:-.6px;color:var(--ink);}
-.page-actions{display:flex;gap:9px;flex:none;}
-.panel{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--card);
-  border:1px solid var(--hairline);border-radius:var(--r-lg);overflow:hidden;}
-.panel-hd{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;
-  border-bottom:1px solid var(--hairline);background:var(--canvas-soft);}
-.panel-title{font-size:11px;font-weight:600;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;}
-.panel-bd{flex:1;min-height:0;overflow:auto;}
-.panel-empty{padding:22px 16px;text-align:center;color:var(--muted-soft);font-size:13px;}
-
-/* ================================ ATOMS ================================= */
-.card{background:var(--card);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:22px;}
-.card+.card{margin-top:14px;}
-.field{margin-bottom:18px;}
-.field:last-child{margin-bottom:0;}
-.field>label{display:block;font-size:11px;font-weight:600;letter-spacing:.88px;text-transform:uppercase;
-  color:var(--muted);margin-bottom:7px;}
-.field>label .req{color:var(--primary);}
-input[type=text],input[type=password],input[type=number],select,textarea{
-  width:100%;font-family:var(--sans);font-size:14px;color:var(--ink);background:var(--card);
-  border:1px solid var(--hairline-strong);border-radius:var(--r-md);padding:10px 13px;outline:none;
-  transition:border-color .12s,box-shadow .12s;}
-input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
-input::placeholder,textarea::placeholder{color:var(--muted-soft);}
-textarea{resize:vertical;min-height:104px;line-height:1.6;}
-
-.btn{appearance:none;font-family:var(--sans);font-size:14px;font-weight:500;border:1px solid var(--hairline-strong);
-  background:var(--card);color:var(--ink);border-radius:var(--r-md);padding:9px 16px;cursor:pointer;height:40px;
-  display:inline-flex;align-items:center;gap:8px;transition:background .12s,border-color .12s,opacity .12s;}
-.btn:hover{background:var(--canvas);border-color:var(--muted-soft);}
-.btn .k{color:var(--muted-soft);font-size:11px;font-family:var(--mono);}
-.btn.primary{background:var(--primary);color:var(--on-primary);border-color:var(--primary);}
-.btn.primary:hover{background:var(--primary-active);border-color:var(--primary-active);}
-.btn.primary .k{color:#ffd5c2;}
-.btn.danger{color:var(--error);border-color:#e7b4c0;}
-.btn.danger:hover{background:var(--error-soft);}
-.btn.ghost{background:none;border-color:transparent;color:var(--body);}
-.btn.ghost:hover{background:var(--surface-strong);color:var(--ink);}
-.btn:disabled{opacity:.4;cursor:not-allowed;}
-.btn.sm{height:32px;padding:5px 11px;font-size:13px;}
-.btnrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:22px;}
-.btnrow .spring{flex:1;}
-
-.note{display:flex;gap:10px;padding:12px 14px;border:1px solid var(--hairline);border-left:3px solid var(--muted-soft);
-  border-radius:var(--r-md);background:var(--canvas-soft);color:var(--body);font-size:13px;margin-top:16px;}
-.note .i{color:var(--muted);font-weight:700;font-family:var(--mono);}
-.note.warn{border-left-color:var(--gold);background:var(--gold-soft);color:#6e4f1c;}
-.note.warn .i{color:var(--gold);}
-.hl{color:var(--primary);font-weight:500;}
-.muted{color:var(--muted);}
-
-/* stat cards */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:10px;}
-.stat{background:var(--card);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:15px 16px;}
-.stat .n{font-family:var(--mono);font-size:25px;font-weight:500;line-height:1.05;color:var(--ink);
-  font-variant-numeric:tabular-nums;}
-.stat .l{font-size:11px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-top:5px;}
-.stat.accent .n{color:var(--primary);} .stat.ok .n{color:var(--success);} .stat.bad .n{color:var(--error);}
-.stat.skip .n{color:var(--muted);}
-
-/* badge pill */
-.badge{font-size:11px;font-weight:600;letter-spacing:.4px;padding:4px 10px;border-radius:var(--r-pill);white-space:nowrap;}
-.badge.ready{color:var(--primary);background:var(--primary-soft);}
-.badge.done{color:var(--success);background:var(--success-soft);}
-
-/* ============================== ICON (SVG) ============================= */
-.ico{display:inline-flex;align-items:center;justify-content:center;line-height:0;}
-.ico svg{width:1em;height:1em;display:block;}
-.iconbtn svg{width:16px;height:16px;display:block;}
-.mfcard .ic svg{width:19px;height:19px;display:block;}
-
-/* ============================ MANIFEST CARDS =========================== */
-.mfcard{display:flex;align-items:center;gap:15px;padding:14px 16px;cursor:pointer;
-  border-bottom:1px solid var(--hairline-soft);transition:background .12s;}
-.mfcard:last-child{border-bottom:none;}
-.mfcard:hover{background:var(--canvas-soft);}
-.mfcard .ic{width:40px;height:40px;border:1px solid var(--hairline);border-radius:var(--r-md);display:grid;
-  place-items:center;color:var(--primary);font-size:17px;flex:none;background:var(--canvas-soft);}
-.mfcard .info{flex:1;min-width:0;}
-.mfcard .info .nm{font-weight:600;color:var(--ink);font-family:var(--mono);font-size:13.5px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.mfcard .info .meta{font-size:12px;color:var(--muted);margin-top:3px;}
-.mfcard .arr{color:var(--muted-soft);font-size:16px;}
-
-/* ================================ EDIT ================================== */
-.editor{display:grid;grid-template-columns:1fr;gap:14px;min-height:440px;}
-@media(min-width:880px){.editor{grid-template-columns:320px 1fr;}}
-.elist{border:1px solid var(--hairline);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column;background:var(--card);}
-.elist .tb{padding:10px;border-bottom:1px solid var(--hairline);}
-.elist .tb input{padding:8px 11px;}
-.elist .rows{overflow:auto;max-height:430px;}
-.erow{padding:11px 13px;border-bottom:1px solid var(--hairline-soft);cursor:pointer;transition:background .1s;
-  display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:3px 8px;}
-.erow:last-child{border-bottom:none;}
-.erow:hover{background:var(--canvas-soft);}
-.erow.sel{background:var(--primary-soft);box-shadow:inset 3px 0 0 var(--primary);}
-.erow.skipped{opacity:.5;}
-.erow.skipped .m{text-decoration:line-through;color:var(--muted);}
-.erow .u{grid-area:1/1;font-size:11px;color:var(--muted);font-family:var(--mono);}
-.erow .m{grid-area:2/1;font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.erow .s{grid-area:1/2/3/2;align-self:center;}
-.etag{font-size:11px;font-weight:600;color:var(--muted);background:var(--surface-strong);border-radius:var(--r-pill);padding:2px 9px;white-space:nowrap;}
-
-.detail .hd{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
-.kv{display:grid;grid-template-columns:96px 1fr;gap:7px 12px;font-size:13px;margin:0;}
-.kv dt{color:var(--muted);text-transform:uppercase;font-size:11px;font-weight:600;letter-spacing:.7px;padding-top:2px;}
-.kv dd{margin:0;color:var(--ink);word-break:break-all;}
-.kv dd.mono{font-family:var(--mono);font-size:12px;}
-.counter{font-size:12px;color:var(--muted);text-align:right;margin-top:6px;font-family:var(--mono);}
-.counter.over{color:var(--error);font-weight:500;}
-.api{font-family:var(--mono);font-size:12px;background:var(--surface-strong);border-radius:var(--r-sm);padding:2px 8px;color:var(--ink);}
-
-/* confirm */
-.confirm-box{border:1px solid #e7b4c0;background:var(--error-soft);border-radius:var(--r-lg);padding:14px;
-  display:flex;gap:11px;align-items:flex-start;font-size:13px;color:#9a2440;font-weight:500;cursor:pointer;margin-top:16px;}
-.confirm-box input{accent-color:var(--error);margin-top:2px;}
-
-/* ================================= RUN ================================== */
-.proghead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
-.bar{height:10px;background:var(--surface-strong);border-radius:var(--r-pill);overflow:hidden;}
-.bar .fill{height:100%;width:0%;background:var(--primary);border-radius:var(--r-pill);transition:width .35s var(--ease-out);}
-
-/* execution timeline (signature: Cursor pastel stage pills) */
-.timeline{margin-top:16px;background:var(--card);border:1px solid var(--hairline);border-radius:var(--r-lg);
-  max-height:320px;overflow:auto;padding:6px 16px;}
-.logrow{display:flex;align-items:baseline;gap:11px;padding:8px 0;border-bottom:1px solid var(--hairline-soft);font-size:13px;}
-.logrow:last-child{border-bottom:none;}
-.logrow .t{font-family:var(--mono);color:var(--muted-soft);font-size:12px;flex:none;}
-.logrow .lu{font-family:var(--mono);color:var(--muted);font-size:12px;flex:none;}
-.logrow .lx{color:var(--body);}
-.tlp{font-size:10px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;padding:3px 9px;
-  border-radius:var(--r-pill);flex:none;color:var(--ink);min-width:84px;text-align:center;}
-.tlp.start{background:var(--tl-thinking);}
-.tlp.written{background:var(--tl-grep);}
-.tlp.overwrite{background:var(--tl-edit);}
-.tlp.backoff{background:var(--tl-done);color:#fff;}
-.tlp.done{background:var(--tl-done);color:#fff;}
-.tlp.info{background:var(--surface-strong);color:var(--ink);}
-.tlp.failed{background:var(--error-soft);color:var(--error);}
-
-.rl{display:none;align-items:center;gap:10px;padding:11px 14px;border:1px solid #e2c89a;background:var(--gold-soft);
-  border-radius:var(--r-md);color:#6e4f1c;font-size:13px;margin-top:14px;}
-.rl.show{display:flex;}
-.rl b{color:var(--gold);}
-
-/* =============================== HISTORY ================================ */
-table.tb{width:100%;border-collapse:collapse;font-size:13px;}
-table.tb th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);
-  padding:12px 14px;border-bottom:1px solid var(--hairline-strong);}
-table.tb td{padding:12px 14px;border-bottom:1px solid var(--hairline-soft);color:var(--ink);}
-table.tb tr:last-child td{border-bottom:none;}
-table.tb tr:hover td{background:var(--canvas-soft);}
-.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);}
-
-/* toast */
-#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--ink);
-  color:var(--canvas);padding:10px 18px;border-radius:var(--r-md);font-size:13px;opacity:0;pointer-events:none;
-  transition:all .2s var(--ease-out);z-index:80;}
-
-/* ============================ LOGIN MODAL ============================== */
-.iconbtn{appearance:none;border:1px solid transparent;background:none;color:var(--muted);cursor:pointer;
-  width:30px;height:30px;border-radius:var(--r-md);display:inline-flex;align-items:center;justify-content:center;
-  font-size:15px;flex:none;transition:background .12s,color .12s;}
-.iconbtn:hover{background:var(--surface-strong);color:var(--ink);}
-.iconbtn.danger:hover{background:var(--error-soft);color:var(--error);}
-
-.modal-backdrop{position:absolute;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
-  background:rgba(38,37,30,.32);backdrop-filter:blur(2px);opacity:0;pointer-events:none;
-  transition:opacity .2s var(--ease-out);}
-.modal-backdrop.show{opacity:1;pointer-events:auto;}
-.modal{position:relative;width:400px;max-width:92%;background:var(--card);border:1px solid var(--hairline-strong);
-  border-radius:14px;box-shadow:0 26px 64px -18px rgba(38,37,30,.55);overflow:hidden;
-  opacity:0;transform:translateY(12px) scale(.97);transition:opacity .22s var(--ease-out),transform .22s var(--ease-out);}
-.modal-backdrop.show .modal{opacity:1;transform:none;}
-.modal-hd{padding:20px 20px 0;}
-.modal-hd h2{font-size:16px;font-weight:600;margin:0;color:var(--ink);letter-spacing:-.2px;}
-.modal-bd{padding:16px 20px 18px;}
-.modal-bd .field{margin-bottom:14px;}
-.modal-status{min-height:17px;font-size:12px;line-height:1.4;color:var(--muted);margin-top:2px;}
-.modal-prompt{font-size:13px;line-height:1.5;color:var(--body);margin:0 0 14px;}
-.modal-ft{display:flex;justify-content:flex-end;gap:9px;padding:14px 20px;border-top:1px solid var(--hairline-soft);
-  background:var(--canvas-soft);}
-.modal-ft .btn{min-width:84px;justify-content:center;}
-.codeinput{font-family:var(--mono);font-size:18px;letter-spacing:8px;text-align:center;}
-
-/* settings · segmented language switch */
-.seg{display:flex;gap:6px;}
-.seg button{flex:1;appearance:none;font-family:var(--sans);font-size:13px;font-weight:500;padding:9px 6px;
-  border:1px solid var(--hairline-strong);background:var(--card);color:var(--body);border-radius:var(--r-md);
-  cursor:pointer;transition:background .12s,border-color .12s,color .12s;}
-.seg button:hover{border-color:var(--muted-soft);}
-.seg button.on{background:var(--primary-soft);border-color:var(--primary);color:var(--primary);}
-
-/* report status pill */
-.rstatus{font-size:11px;font-weight:600;letter-spacing:.3px;padding:3px 10px;border-radius:var(--r-pill);white-space:nowrap;}
-.rstatus.ok{color:var(--success);background:var(--success-soft);}
-.rstatus.bad{color:var(--error);background:var(--error-soft);}
-.rstatus.skip{color:var(--muted);background:var(--surface-strong);}
-
-/* component motion */
-.btn:active{transform:translateY(1px);}
-.logrow{animation:in .22s var(--ease-out);}
-.mfcard{animation:in .22s var(--ease-out);}
-</style>
-</head>
-<body>
-<div class="desktop">
-<div class="app">
-
-  <!-- ============================== TITLEBAR ============================= -->
-  <div class="titlebar">
-    <div class="lights"><span class="tl c"></span><span class="tl y"></span><span class="tl g"></span></div>
-    <div class="wtitle"><span class="logo ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="5.6" y1="5.6" x2="18.4" y2="18.4"/></svg></span> vrc-blocker <span class="wv">v0.1.0</span></div>
-  </div>
-
-  <div class="shell">
-
-  <!-- ============================== SIDEBAR ============================== -->
-  <aside class="side">
-    <div class="acct" id="acct">
-      <div class="acctIn">
-        <div class="acctMain">
-          <div class="nm"><span class="dot" id="sDot"></span><span id="sName">Example_VRC</span></div>
-          <div class="uid" id="sUid">usr_0000…0001</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VRC Blocker</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="titlebar" data-tauri-drag-region>
+        <div class="window-controls" aria-label="窗口控制">
+          <button class="window-control close" id="windowCloseButton" type="button" aria-label="关闭窗口"></button>
+          <button class="window-control minimize" id="windowMinimizeButton" type="button" aria-label="最小化窗口"></button>
+          <button class="window-control maximize" id="windowMaximizeButton" type="button" aria-label="最大化窗口"></button>
         </div>
-        <button class="iconbtn danger" onclick="logout()" title="登出账号" aria-label="登出账号"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
-      </div>
-      <button class="acctOut" onclick="openLogin()"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span> 登录 VRChat</button>
-    </div>
-
-    <div class="side-label">工作区</div>
-    <nav class="nav">
-      <button class="nitem active" data-go="import"><span class="g">›</span> 名单</button>
-      <button class="nitem" data-go="history"><span class="g">›</span> 历史</button>
-    </nav>
-
-    <div class="side-foot">
-      <button class="sf-link" onclick="openSettings()">语言</button>
-      <div class="sf-ver">vrc-blocker · v0.1.0</div>
-    </div>
-  </aside>
-
-  <!-- =============================== MAIN ================================ -->
-  <main class="main">
-
-    <!-- -------- 屏蔽名单（主工作台：导入 / 管理 / 进入编辑执行） -------- -->
-    <section class="screen active" id="s-import">
-      <div class="page-head">
-        <div>
-          <h1>屏蔽名单</h1>
-          <p class="lead">导入并管理你的屏蔽名单（<span class="hl">uid,备注</span> 两列）。点开名单可编辑备注、执行屏蔽并查看报告。</p>
+        <div class="window-title" data-tauri-drag-region>
+          <span class="window-logo" data-tauri-drag-region>⊘</span>
+          <span data-tauri-drag-region>vrc-blocker</span>
+          <span class="window-version" data-tauri-drag-region>v0.1.0</span>
         </div>
-        <div class="page-actions">
-          <button class="btn" onclick="toast('export_template() → vrc_block_list_example.csv 已下载')">下载示例 CSV</button>
-          <button class="btn primary" onclick="importCsv()">导入 CSV</button>
-        </div>
-      </div>
+      </header>
 
-      <div class="stats" style="margin-bottom:16px">
-        <div class="stat"><div class="n" id="stMf">3</div><div class="l">名单</div></div>
-        <div class="stat accent"><div class="n" id="stPending">1</div><div class="l">待执行</div></div>
-        <div class="stat ok"><div class="n" id="stBlocked">172</div><div class="l">累计屏蔽</div></div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-hd"><span class="panel-title">全部名单</span><span class="muted" id="mfCountLbl">3 份</span></div>
-        <div class="panel-bd" id="mfList"></div>
-      </div>
-    </section>
-
-    <!-- -------- 名单详情：编辑 + 执行 + 时间线 -------- -->
-    <section class="screen" id="s-manifest">
-      <div class="h">
-        <button class="btn ghost sm" onclick="go('import')">← 名单</button>
-        <h1 id="mfName" class="mono" style="font-size:18px">vrc_block_list.csv</h1>
-      </div>
-
-      <!-- 编辑模式 -->
-      <div id="mfEdit">
-        <div class="editor">
-          <div class="elist">
-            <div class="tb"><input type="text" placeholder="搜索 UID / 备注…" oninput="filterRows(this.value)"></div>
-            <div class="rows" id="editRows"></div>
+      <div class="workspace">
+      <aside class="sidebar" aria-label="主导航">
+        <header class="brand">
+          <div class="brand-mark">VB</div>
+          <div>
+            <div class="brand-name">VRC Blocker</div>
+            <div class="brand-version">0.1.0</div>
           </div>
-          <div class="detail card">
-            <div class="hd">
-              <span id="dUid" class="mono" style="font-size:12px;color:var(--muted);flex:1;word-break:break-all">usr_…</span>
-              <button class="btn ghost sm" id="skipBtn" onclick="toggleSkip()">跳过</button>
+        </header>
+
+        <section class="account-panel" aria-label="账号状态">
+          <button class="account-button" id="accountButton" type="button">
+            <span class="session-dot" id="sessionDot"></span>
+            <span>
+              <span class="account-name" id="accountName">会话未验证</span>
+              <span class="account-meta" id="accountMeta">等待登录</span>
+            </span>
+          </button>
+        </section>
+
+        <nav class="nav-list" aria-label="页面">
+          <button class="nav-item active" data-view="import" type="button">
+            <span class="nav-icon">＋</span>
+            <span>导入</span>
+          </button>
+          <button class="nav-item" data-view="history" type="button">
+            <span class="nav-icon">▦</span>
+            <span>历史</span>
+          </button>
+        </nav>
+
+        <footer class="sidebar-footer">
+          <button class="sidebar-link" id="refreshSessionButton" type="button">
+            刷新会话
+          </button>
+          <button class="sidebar-link" id="logoutButton" type="button">
+            退出登录
+          </button>
+          <div class="runtime-state" id="runtimeState">运行时检查中</div>
+        </footer>
+      </aside>
+
+      <main class="main">
+        <section class="view active" id="importView" aria-labelledby="importTitle">
+          <div class="page-head">
+            <div>
+              <h1 id="importTitle">导入名单</h1>
+              <p class="page-copy">
+                CSV 只读取 <code>uid</code> 和 <code>memo</code>。执行时会先覆盖线上备注，再屏蔽玩家。
+              </p>
             </div>
-            <div class="field"><label>备注 (memo)</label>
-              <textarea id="dMemo" oninput="onMemo()"></textarea>
-              <div class="counter" id="dCount">0 / 256</div></div>
-            <div class="note"><span class="i">i</span><div>备注将写入 <span class="hl">VRChat 线上备注</span>，跟随账号同步。</div></div>
+            <div class="page-actions">
+              <button class="button" id="exampleButton" type="button">下载示例 CSV</button>
+              <button class="button primary" id="importButton" type="button">导入 CSV</button>
+              <input id="csvInput" type="file" accept=".csv,text/csv" hidden />
+            </div>
           </div>
-        </div>
 
-        <div class="btnrow">
-          <span class="muted" id="editSummary">76 人将屏蔽 · 1 跳过</span>
-          <span class="spring"></span>
-          <button class="btn primary" onclick="openConfirm()">执行屏蔽 <span class="k">→</span></button>
-        </div>
+          <div class="notice" id="scaffoldNotice">
+            <strong>当前状态</strong>
+            <span>导入、校验、编辑和 dry-run 报告已接后端；真实登录、写备注和屏蔽执行仍在后端接线中。</span>
+          </div>
+
+          <div class="stat-grid" id="importStats" aria-label="导入统计"></div>
+
+          <section class="panel">
+            <div class="panel-head">
+              <span>导入批次</span>
+              <span class="panel-count" id="manifestCount">0</span>
+            </div>
+            <div class="manifest-list" id="manifestList"></div>
+          </section>
+        </section>
+
+        <section class="view" id="editorView" aria-labelledby="editorTitle">
+          <div class="page-head">
+            <div>
+              <button class="back-link" id="backToImportButton" type="button">← 返回</button>
+              <h1 id="editorTitle">编辑确认</h1>
+              <p class="page-copy" id="editorSubtitle">未选择批次</p>
+            </div>
+            <div class="page-actions">
+              <button class="button" id="dryRunButton" type="button">生成 dry-run 报告</button>
+              <button class="button primary" id="confirmButton" type="button">确认执行</button>
+            </div>
+          </div>
+
+          <div class="stat-grid" id="editorStats" aria-label="批次统计"></div>
+
+          <div class="editor-layout">
+            <section class="row-panel" aria-label="名单条目">
+              <div class="search-box">
+                <input id="rowSearch" type="search" placeholder="搜索 UID 或 memo" />
+              </div>
+              <div class="row-list" id="rowList"></div>
+            </section>
+
+            <section class="detail-panel" aria-label="条目详情">
+              <div class="detail-empty" id="detailEmpty">选择一条记录</div>
+              <div class="detail-body" id="detailBody" hidden>
+                <div class="detail-row">
+                  <span class="label">UID</span>
+                  <code id="selectedUid"></code>
+                </div>
+                <label class="field">
+                  <span>备注</span>
+                  <textarea id="memoEditor" rows="7"></textarea>
+                </label>
+                <div class="memo-meter">
+                  <span id="memoCount">0 / 256</span>
+                  <span id="normalizedHint">已按 VRChat 写入前规则规整空白</span>
+                </div>
+                <label class="checkbox-line">
+                  <input id="skipToggle" type="checkbox" />
+                  <span>跳过此条</span>
+                </label>
+                <div class="issue-list" id="issueList"></div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="runView" aria-labelledby="runTitle">
+          <div class="page-head">
+            <div>
+              <button class="back-link" id="backToEditorButton" type="button">← 返回编辑</button>
+              <h1 id="runTitle">执行报告</h1>
+              <p class="page-copy" id="runSubtitle">等待执行</p>
+            </div>
+            <div class="page-actions">
+              <button class="button" id="exportJsonButton" type="button">导出 JSON</button>
+              <button class="button" id="exportFailedCsvButton" type="button">导出失败 CSV</button>
+            </div>
+          </div>
+
+          <div class="stat-grid" id="reportStats" aria-label="报告统计"></div>
+          <section class="panel">
+            <div class="panel-head">
+              <span>条目结果</span>
+              <span class="panel-count" id="reportCount">0</span>
+            </div>
+            <div class="report-list" id="reportList"></div>
+          </section>
+        </section>
+
+        <section class="view" id="historyView" aria-labelledby="historyTitle">
+          <div class="page-head">
+            <div>
+              <h1 id="historyTitle">历史报告</h1>
+              <p class="page-copy">本地报告保存尚未接线。</p>
+            </div>
+          </div>
+          <section class="empty-state">
+            <div class="empty-mark">▦</div>
+            <h2>暂无本地历史</h2>
+            <p>当前运行只保留内存中的最新报告。</p>
+          </section>
+        </section>
+      </main>
       </div>
+    </div>
 
-      <!-- 执行确认 -->
-      <div id="mfConfirm" style="display:none">
-        <p class="lead">单账号串行执行。正常请求只加小抖动；429/5xx 按 Retry-After 或指数退避，<b>401/403 立即停止</b>。</p>
-        <div class="card">
-          <dl class="kv">
-            <dt>账号</dt><dd>Example_VRC <span class="muted mono" style="font-size:12px">(usr_0000…0001)</span></dd>
-            <dt>将屏蔽</dt><dd><span class="hl" id="cfWrite">76</span> 人</dd>
-            <dt>API</dt><dd><span class="api">POST /api/1/userNotes</span> <span class="api">POST /api/1/auth/user/playermoderations</span></dd>
-          </dl>
-          <label class="confirm-box">
-            <input type="checkbox" id="chk" onchange="document.getElementById('startBtn').disabled=!this.checked">
-            <span>我确认屏蔽以上账号，并覆盖写入线上备注。</span>
+    <div class="modal-backdrop" id="loginModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+        <div class="modal-head">
+          <h2 id="loginTitle">VRChat 登录</h2>
+          <button class="icon-button" id="closeLoginButton" type="button" aria-label="关闭">×</button>
+        </div>
+        <form id="loginForm" class="modal-body">
+          <label class="field">
+            <span>用户名或邮箱</span>
+            <input id="loginUser" autocomplete="username" required />
           </label>
-          <div class="btnrow">
-            <button class="btn ghost" onclick="closeConfirm()">← 返回编辑</button>
-            <span class="spring"></span>
-            <button class="btn primary" id="startBtn" disabled onclick="startRun()">开始屏蔽 <span class="k">↵</span></button>
+          <label class="field">
+            <span>密码</span>
+            <input id="loginPassword" type="password" autocomplete="current-password" required />
+          </label>
+          <div class="split-fields">
+            <label class="field">
+              <span>代理</span>
+              <select id="proxyMode">
+                <option value="system">系统</option>
+                <option value="direct">直连</option>
+                <option value="custom">自定义</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>代理地址</span>
+              <input id="proxyUrl" placeholder="http://127.0.0.1:7890" />
+            </label>
           </div>
-        </div>
-      </div>
-
-      <!-- 执行中 / 完成 -->
-      <div id="mfRun" style="display:none">
-        <p class="lead" id="runLead">屏蔽中…实时显示每条备注写入与 block 执行进度。</p>
-
-        <div class="proghead"><span class="cap">执行进度</span><span id="frac" class="mono" style="color:var(--ink)">0 / 76</span></div>
-        <div class="bar"><div class="fill" id="fill"></div></div>
-
-        <div class="stats" style="margin-top:18px">
-          <div class="stat ok"><div class="n" id="cOk">0</div><div class="l">成功</div></div>
-          <div class="stat bad"><div class="n" id="cBad">0</div><div class="l">失败</div></div>
-          <div class="stat skip"><div class="n" id="cSkip">0</div><div class="l">跳过</div></div>
-          <div class="stat"><div class="n" id="cLeft">76</div><div class="l">剩余</div></div>
-        </div>
-
-        <div class="rl" id="rl"><b>429 退避中</b> · 等待 <span id="rlSec">4</span>s 后自动继续（重试 1/5）</div>
-
-        <div class="timeline" id="term"></div>
-
-        <div class="btnrow">
-          <button class="btn" id="pauseBtn" onclick="togglePause()">暂停</button>
-          <button class="btn ghost" onclick="stopRun()">停止</button>
-          <button class="btn ghost" id="retryBtn" onclick="toast('重试失败条目')" style="display:none">重试失败</button>
-          <span class="spring"></span>
-          <button class="btn ghost" id="backBtn" onclick="backToList()" style="display:none">返回名单</button>
-          <button class="btn primary" id="reportBtn" onclick="openReport()" style="display:none">查看报告 <span class="k">→</span></button>
-        </div>
-      </div>
-    </section>
-
-    <!-- -------- 执行报告 -------- -->
-    <section class="screen" id="s-report">
-      <div class="h">
-        <button class="btn ghost sm" onclick="go('manifest')">← 名单</button>
-        <h1>执行报告</h1>
-      </div>
-      <p class="lead">本次屏蔽执行的完整结果。可导出 JSON 存档，或追溯失败条目重试。</p>
-
-      <div class="card" style="margin-bottom:14px">
-        <dl class="kv">
-          <dt>名单</dt><dd class="mono" id="rpName">vrc_block_list.csv</dd>
-          <dt>账号</dt><dd>Example_VRC <span class="muted mono" style="font-size:12px">(usr_0000…0001)</span></dd>
-          <dt>时间</dt><dd id="rpTime">—</dd>
-          <dt>API</dt><dd><span class="api">POST /api/1/userNotes</span> <span class="api">POST /api/1/auth/user/playermoderations</span></dd>
-        </dl>
-      </div>
-
-      <div class="stats" style="margin-bottom:14px">
-        <div class="stat ok"><div class="n" id="rpOk">0</div><div class="l">成功</div></div>
-        <div class="stat bad"><div class="n" id="rpBad">0</div><div class="l">失败</div></div>
-        <div class="stat skip"><div class="n" id="rpSkip">0</div><div class="l">跳过</div></div>
-        <div class="stat"><div class="n" id="rpTotal">0</div><div class="l">总计</div></div>
-      </div>
-
-      <div class="card" style="padding:0;overflow:hidden">
-        <table class="tb">
-          <thead><tr><th>UID</th><th>状态</th><th class="num">HTTP</th><th>详情</th></tr></thead>
-          <tbody id="rpRows"></tbody>
-        </table>
-      </div>
-
-      <div class="btnrow">
-        <button class="btn ghost" onclick="toast('导出失败 CSV')">导出失败 CSV</button>
-        <span class="spring"></span>
-        <button class="btn ghost" onclick="backToList()">返回名单</button>
-        <button class="btn primary" onclick="exportReport()">导出 JSON</button>
-      </div>
-    </section>
-
-    <!-- -------- 历史 -------- -->
-    <section class="screen" id="s-history">
-      <div class="h"><h1>历史</h1></div>
-      <p class="lead">执行记录，可重新打开报告或导出失败 CSV。</p>
-      <div class="stats" style="margin-bottom:18px">
-        <div class="stat"><div class="n">7</div><div class="l">总批次</div></div>
-        <div class="stat ok"><div class="n">512</div><div class="l">累计成功</div></div>
-        <div class="stat bad"><div class="n">9</div><div class="l">累计失败</div></div>
-        <div class="stat skip"><div class="n">38</div><div class="l">累计跳过</div></div>
-      </div>
-      <div class="card" style="padding:0;overflow:hidden">
-        <table class="tb">
-          <thead><tr><th>时间</th><th>账号</th><th class="num">写入</th><th class="num">成功</th><th class="num">失败</th><th class="num">跳过</th><th></th></tr></thead>
-          <tbody>
-            <tr><td class="mono">06-24 12:04</td><td>Example_VRC</td><td class="num">76</td><td class="num" style="color:var(--success)">73</td><td class="num" style="color:var(--error)">3</td><td class="num">4</td><td><button class="btn ghost sm" onclick="openHistoryReport('vrc_block_list.csv','2026-06-24 12:04',73,3,4)">报告</button></td></tr>
-            <tr><td class="mono">06-22 21:30</td><td>Example_VRC</td><td class="num">120</td><td class="num" style="color:var(--success)">118</td><td class="num" style="color:var(--error)">2</td><td class="num">11</td><td><button class="btn ghost sm" onclick="openHistoryReport('raiders_2025q2.csv','2026-06-22 21:30',118,2,11)">报告</button></td></tr>
-            <tr><td class="mono">06-19 09:12</td><td>Example_VRC</td><td class="num">54</td><td class="num" style="color:var(--success)">54</td><td class="num">0</td><td class="num">2</td><td><button class="btn ghost sm" onclick="openHistoryReport('harassment_list.csv','2026-06-19 09:12',54,0,2)">报告</button></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-  </main>
-  </div><!-- /shell -->
-
-  <!-- ============================ LOGIN MODAL =========================== -->
-  <div class="modal-backdrop" id="loginModal" onclick="if(event.target===this)closeLogin()">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-      <div class="modal-hd">
-        <h2 id="loginTitle">登录 VRChat</h2>
-      </div>
-      <div class="modal-bd">
-        <div id="loginStep1">
-          <div class="field">
-            <label for="loginUser">用户名或邮箱 <span class="req">*</span></label>
-            <input id="loginUser" type="text" value="Example_VRC" placeholder="username 或 you@example.com" />
+          <div class="form-error" id="loginError" hidden></div>
+          <div class="modal-actions">
+            <button class="button" id="cancelLoginButton" type="button">取消</button>
+            <button class="button primary" id="submitLoginButton" type="submit">登录</button>
           </div>
-          <div class="field">
-            <label for="loginPass">密码 <span class="req">*</span></label>
-            <input id="loginPass" type="password" value="••••••••••" placeholder="不会写入磁盘" />
+        </form>
+
+        <form id="twoFactorForm" class="modal-body" hidden>
+          <p class="page-copy" id="twoFactorMessage">输入二步验证码。</p>
+          <label class="field">
+            <span>验证码</span>
+            <input id="twoFactorCode" inputmode="numeric" autocomplete="one-time-code" />
+          </label>
+          <div class="form-error" id="twoFactorError" hidden></div>
+          <div class="modal-actions">
+            <button class="button" id="backToLoginButton" type="button">返回</button>
+            <button class="button primary" type="submit">验证</button>
           </div>
-        </div>
-        <div id="twofa" style="display:none">
-          <p class="modal-prompt">需要两步验证。请输入验证器 App 生成的 6 位 TOTP 验证码。</p>
-          <div class="field">
-            <label for="otpCode">验证码</label>
-            <input id="otpCode" class="codeinput" type="text" inputmode="numeric" maxlength="6" placeholder="000000"
-              oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)" />
-          </div>
-        </div>
-        <div class="modal-status" id="loginState">输入账号密码后点击登录</div>
-      </div>
-      <div class="modal-ft">
-        <button class="btn ghost" id="loginCancel" onclick="loginBack()">取消</button>
-        <button class="btn primary" id="loginBtn" onclick="doLogin()">登录 <span class="k">↵</span></button>
-      </div>
+        </form>
+      </section>
     </div>
-  </div>
 
-  <!-- ============================ SETTINGS MODAL ======================== -->
-  <div class="modal-backdrop" id="settingsModal" onclick="if(event.target===this)closeSettings()">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="setTitle">
-      <div class="modal-hd"><h2 id="setTitle">语言</h2></div>
-      <div class="modal-bd">
-        <div class="field">
-          <label>界面语言</label>
-          <div class="seg" id="langSeg">
-            <button class="on" onclick="setLang(this,'zh')">中文</button>
-            <button onclick="setLang(this,'ja')">日本語</button>
-            <button onclick="setLang(this,'en')">English</button>
+    <div class="modal-backdrop" id="confirmModal" hidden>
+      <section class="modal compact" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <div class="modal-head">
+          <h2 id="confirmTitle">确认执行</h2>
+          <button class="icon-button" id="closeConfirmButton" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="modal-body">
+          <p class="page-copy" id="confirmCopy">准备执行。</p>
+          <div class="confirm-metrics" id="confirmMetrics"></div>
+          <div class="notice danger">
+            <strong>覆盖策略</strong>
+            <span>线上 userNotes 会被 CSV 中的 memo 直接覆盖。</span>
+          </div>
+          <div class="modal-actions">
+            <button class="button" id="cancelConfirmButton" type="button">取消</button>
+            <button class="button primary" id="runConfirmedButton" type="button">执行 dry-run</button>
           </div>
         </div>
-      </div>
-      <div class="modal-ft">
-        <button class="btn primary" onclick="closeSettings()">完成</button>
-      </div>
+      </section>
     </div>
-  </div>
 
-
-</div><!-- /app -->
-</div><!-- /desktop -->
-
-<div id="toast"></div>
-
-<script>
-/* ---------------- nav ---------------- */
-const screens=["import","manifest","history","report"];
-function go(id){
-  screens.forEach(s=>document.getElementById("s-"+s).classList.toggle("active",s===id));
-  const navId=(id==="manifest"||id==="report")?"import":id;
-  document.querySelectorAll(".nitem").forEach(n=>n.classList.toggle("active",n.dataset.go===navId));
-  document.querySelector(".main").scrollTop=0;
-}
-document.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>go(el.dataset.go)));
-
-/* ---------------- toast ---------------- */
-let tT;function toast(m){const t=document.getElementById("toast");t.textContent=m;
-  t.style.opacity="1";t.style.transform="translateX(-50%) translateY(0)";
-  clearTimeout(tT);tT=setTimeout(()=>{t.style.opacity="0";t.style.transform="translateX(-50%) translateY(20px)";},1700);}
-
-/* ---------------- login modal + inline 2fa ---------------- */
-function showCredentials(){
-  document.getElementById("twofa").style.display="none";
-  document.getElementById("loginStep1").style.display="block";
-  document.getElementById("loginTitle").textContent="登录 VRChat";
-  document.getElementById("loginCancel").textContent="取消";
-  document.getElementById("loginBtn").innerHTML="登录 <span class='k'>↵</span>";
-  const st=document.getElementById("loginState");st.textContent="输入账号密码后点击登录";st.style.color="";
-}
-function openLogin(){showCredentials();document.getElementById("loginModal").classList.add("show");}
-function closeLogin(){document.getElementById("loginModal").classList.remove("show");}
-function loginBack(){
-  if(document.getElementById("twofa").style.display!=="none"){showCredentials();}
-  else{closeLogin();}
-}
-
-/* ---------------- settings modal ---------------- */
-function openSettings(){document.getElementById("settingsModal").classList.add("show");}
-function closeSettings(){document.getElementById("settingsModal").classList.remove("show");}
-function setLang(btn,code){
-  document.querySelectorAll("#langSeg button").forEach(b=>b.classList.remove("on"));
-  btn.classList.add("on");
-  toast("界面语言已切换为 "+{zh:"中文",ja:"日本語",en:"English"}[code]);
-}
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeLogin();closeSettings();}});
-function setLoggedIn(v){
-  document.getElementById("acct").classList.toggle("out",!v);
-  document.getElementById("sDot").className=v?"dot":"dot off";
-}
-function logout(){setLoggedIn(false);toast("已登出，本地会话已清除");}
-function doLogin(){
-  const st=document.getElementById("loginState"),tf=document.getElementById("twofa");
-  if(tf.style.display==="none"){
-    st.textContent="登录中…";
-    setTimeout(()=>{
-      document.getElementById("loginStep1").style.display="none";
-      tf.style.display="block";
-      document.getElementById("loginTitle").textContent="两步验证";
-      document.getElementById("loginCancel").textContent="返回";
-      document.getElementById("loginBtn").innerHTML="提交验证 <span class='k'>↵</span>";
-      st.innerHTML="<span style='color:var(--gold)'>需要验证器 App 中的验证码</span>";
-      const ci=document.getElementById("otpCode");ci.value="";ci.focus();
-    },600);
-  }else{
-    st.innerHTML="<span style='color:var(--success)'>登录成功</span>";
-    setTimeout(()=>{setLoggedIn(true);closeLogin();toast("会话已建立");},450);
-  }
-}
-
-/* ---------------- manifest list ---------------- */
-const manifests=[
-  {id:0,name:"vrc_block_list.csv",count:76,date:"06-24 12:00",status:"ready"},
-  {id:1,name:"raiders_2025q2.csv",count:120,date:"06-22 21:10",status:"done",ok:118,bad:2},
-  {id:2,name:"harassment_list.csv",count:54,date:"06-19 09:00",status:"done",ok:54,bad:0},
-];
-function renderManifests(){
-  const box=document.getElementById("mfList");box.innerHTML="";
-  manifests.forEach(m=>{
-    const badge=m.status==="ready"?`<span class="badge ready">未执行</span>`
-      :`<span class="badge done">已执行 ${m.ok}/${m.count}</span>`;
-    const d=document.createElement("div");d.className="mfcard";
-    d.innerHTML=`<div class="ic ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="5.6" y1="5.6" x2="18.4" y2="18.4"/></svg></div>
-      <div class="info"><div class="nm">${m.name}</div>
-        <div class="meta">${m.count} 人 · 导入于 ${m.date}</div></div>
-      ${badge}<div class="arr">›</div>`;
-    d.onclick=()=>openManifest(m.id);box.appendChild(d);
-  });
-  const pending=manifests.filter(m=>m.status==="ready").length;
-  const blocked=manifests.reduce((s,m)=>s+(m.status==="done"?(m.ok||0):0),0);
-  document.getElementById("mfCountLbl").textContent=manifests.length+" 份";
-  document.getElementById("stMf").textContent=manifests.length;
-  document.getElementById("stPending").textContent=pending;
-  document.getElementById("stBlocked").textContent=blocked;
-}
-function importCsv(){
-  manifests.unshift({id:Date.now(),name:"new_block_"+(manifests.length+1)+".csv",count:42,date:"刚刚",status:"ready"});
-  renderManifests();toast("pick_import_file() → 解析 + 校验 → 新建屏蔽名单");
-}
-
-/* ---------------- manifest detail: edit ---------------- */
-let rows=[],cur=0;
-function seedRows(){return[
-  {uid:"usr_00000000-0000-4000-8000-000000000001",memo:"多次在公共实例骚扰新人，2025-11 有录屏佐证。来源: 社区共享名单。",skip:false},
-  {uid:"usr_8d10c2a9-44b1-4f0a-9c33-77ab2e910abd",memo:"实例内刷屏广告并恶意 ping，多人举报。",skip:false},
-  {uid:"usr_22c9f7e0-1a2b-4c3d-8e5f-0011a2b3c41a",memo:"盗用他人付费模型并二次售卖。",skip:false},
-  {uid:"usr_55ef0090-aabb-ccdd-eeff-0011223390aa",memo:"信息不确定，先手动跳过本条。",skip:true},
-  {uid:"usr_4b7c2f88-9a0b-4c1d-2e3f-445566772f00",memo:"恶意尾随并录制他人，拒绝停止。",skip:false},
-  {uid:"usr_91a2be33-7788-99aa-bbcc-ddeeff0091be",memo:"语音骚扰，多人举报有记录。",skip:false},
-];}
-function openManifest(id){
-  const m=manifests.find(x=>x.id===id);if(m)document.getElementById("mfName").textContent=m.name;
-  rows=seedRows();cur=0;
-  document.getElementById("mfEdit").style.display="block";
-  document.getElementById("mfConfirm").style.display="none";
-  document.getElementById("mfRun").style.display="none";
-  renderRows();sel(0);go("manifest");
-}
-function renderRows(f=""){const b=document.getElementById("editRows");b.innerHTML="";
-  rows.forEach((r,i)=>{if(f&&!(r.uid+r.memo).toLowerCase().includes(f.toLowerCase()))return;
-    const d=document.createElement("div");d.className="erow"+(i===cur?" sel":"")+(r.skip?" skipped":"");
-    d.innerHTML=`<div class="u">${r.uid.slice(0,12)}…${r.uid.slice(-4)}</div><div class="m">${r.memo}</div>`+
-      (r.skip?`<div class="s"><span class="etag">跳过</span></div>`:`<div class="s"></div>`);
-    d.onclick=()=>sel(i);b.appendChild(d);});
-  updateSummary();
-}
-function sel(i){cur=i;const r=rows[i];
-  document.getElementById("dUid").textContent=r.uid;
-  document.getElementById("dMemo").value=r.memo;
-  document.getElementById("skipBtn").textContent=r.skip?"恢复写入":"跳过";
-  updateCount();
-  document.querySelectorAll("#editRows .erow").forEach((el,idx)=>el.classList.toggle("sel",idx===i));}
-function toggleSkip(){rows[cur].skip=!rows[cur].skip;renderRows();sel(cur);}
-function onMemo(){rows[cur].memo=document.getElementById("dMemo").value;updateCount();
-  const m=document.querySelectorAll("#editRows .erow .m")[cur];if(m)m.textContent=rows[cur].memo;}
-function filterRows(v){renderRows(v);}
-function updateCount(){const v=document.getElementById("dMemo").value,c=document.getElementById("dCount");
-  c.textContent=v.length+" / 256";c.classList.toggle("over",v.length>256);}
-function writableCount(){return rows.filter(r=>!r.skip).length;}
-function updateSummary(){const w=writableCount();
-  document.getElementById("editSummary").textContent=w+" 人将屏蔽 · "+(rows.length-w)+" 跳过";}
-
-/* ---------------- confirm ---------------- */
-function openConfirm(){
-  document.getElementById("mfEdit").style.display="none";
-  document.getElementById("mfConfirm").style.display="block";
-  document.getElementById("cfWrite").textContent=writableCount();
-  document.getElementById("chk").checked=false;document.getElementById("startBtn").disabled=true;
-}
-function closeConfirm(){
-  document.getElementById("mfConfirm").style.display="none";
-  document.getElementById("mfEdit").style.display="block";
-}
-
-/* ---------------- run ---------------- */
-let timer=null,paused=false,done=0,total=76,ok=0,bad=0,skip=0,results=[];
-function startRun(){
-  total=writableCount();done=ok=bad=0;skip=rows.filter(r=>r.skip).length;results=[];
-  document.getElementById("mfConfirm").style.display="none";
-  document.getElementById("mfRun").style.display="block";
-  document.getElementById("term").innerHTML="";
-  document.getElementById("pauseBtn").style.display="inline-flex";
-  document.getElementById("retryBtn").style.display="none";
-  document.getElementById("reportBtn").style.display="none";
-  document.getElementById("backBtn").style.display="none";
-  document.getElementById("runLead").textContent="屏蔽中…实时显示每个用户的备注写入进度。";
-  refresh();
-  document.getElementById("sDot").className="dot warn";
-  log("start","","开始执行屏蔽 "+total+" 人 · POST /api/1/userNotes + POST /api/1/auth/user/playermoderations");
-  timer=setInterval(tick,600);
-}
-function tick(){
-  if(paused)return;
-  if(done>=total){clearInterval(timer);finish();return;}
-  const roll=Math.random();
-  if(roll<0.1){rateLimit();return;}
-  done++;
-  const uid="usr_"+Math.random().toString(16).slice(2,6)+"…"+Math.random().toString(16).slice(2,4);
-  if(roll<0.16){bad++;log("failed",uid,"500 server error");results.push({uid,status:"failed",code:500,msg:"server error"});}
-  else if(roll<0.42){ok++;log("overwrite",uid,"200 · 覆盖已有备注 · verified");results.push({uid,status:"success",code:200,msg:"覆盖已有备注 · verified"});}
-  else{ok++;log("written",uid,"200 · verified via GET users/{uid}");results.push({uid,status:"success",code:200,msg:"verified via GET users/{uid}"});}
-  refresh();
-}
-function rateLimit(){const rl=document.getElementById("rl");rl.classList.add("show");
-  log("backoff","","429 too many requests — 退避中");
-  let s=4;document.getElementById("rlSec").textContent=s;paused=true;
-  const cd=setInterval(()=>{s--;document.getElementById("rlSec").textContent=s;
-    if(s<=0){clearInterval(cd);rl.classList.remove("show");paused=false;}},600);}
-const TLP={start:"START",written:"WRITTEN",overwrite:"OVERWRITE",backoff:"BACKOFF",done:"DONE",info:"INFO",failed:"FAILED"};
-function log(stage,uid,txt){const t=document.getElementById("term");
-  const ln=document.createElement("div");ln.className="logrow";
-  const now=new Date().toTimeString().slice(0,8);
-  ln.innerHTML=`<span class="t">${now}</span><span class="tlp ${stage}">${TLP[stage]}</span>`+
-    (uid?`<span class="lu">${uid}</span>`:``)+`<span class="lx">${txt}</span>`;
-  t.appendChild(ln);t.scrollTop=t.scrollHeight;}
-function refresh(){const p=Math.round(done/total*100);
-  document.getElementById("fill").style.width=p+"%";document.getElementById("frac").textContent=done+" / "+total;
-  document.getElementById("cOk").textContent=ok;document.getElementById("cBad").textContent=bad;
-  document.getElementById("cSkip").textContent=skip;document.getElementById("cLeft").textContent=total-done;}
-function togglePause(){paused=!paused;document.getElementById("pauseBtn").textContent=paused?"继续":"暂停";}
-function stopRun(){clearInterval(timer);log("info","","已停止");finish(true);}
-function finish(stopped){
-  clearInterval(timer);
-  document.getElementById("sDot").className="dot";
-  document.getElementById("runLead").innerHTML=stopped?"已停止。":"完成 · 成功 "+ok+" · 失败 "+bad+(skip?(" · 跳过 "+skip):"");
-  document.getElementById("pauseBtn").style.display="none";
-  document.getElementById("retryBtn").style.display=bad>0?"inline-flex":"none";
-  document.getElementById("reportBtn").style.display="inline-flex";
-  document.getElementById("backBtn").style.display="inline-flex";
-  if(!stopped){log("done","","全部完成 · 成功 "+ok+" 失败 "+bad);markDone();}
-}
-function markDone(){const name=document.getElementById("mfName").textContent;
-  const m=manifests.find(x=>x.name===name);if(m){m.status="done";m.ok=ok;m.count=total;}}
-function backToList(){renderManifests();go("import");}
-
-/* ---------------- report ---------------- */
-function shortUid(u){return u.length>20?u.slice(0,12)+"…"+u.slice(-4):u;}
-function randUid(){return "usr_"+Math.random().toString(16).slice(2,6)+"…"+Math.random().toString(16).slice(2,4);}
-function fillReport(name,time,okN,badN,skipN,list){
-  document.getElementById("rpName").textContent=name;
-  document.getElementById("rpTime").textContent=time;
-  document.getElementById("rpOk").textContent=okN;
-  document.getElementById("rpBad").textContent=badN;
-  document.getElementById("rpSkip").textContent=skipN;
-  document.getElementById("rpTotal").textContent=okN+badN+skipN;
-  const tb=document.getElementById("rpRows");tb.innerHTML="";
-  list.forEach(r=>{
-    const cls=r.status==="success"?"ok":(r.status==="failed"?"bad":"skip");
-    const label=r.status==="success"?"成功":(r.status==="failed"?"失败":"跳过");
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td class="mono">${shortUid(r.uid)}</td>`+
-      `<td><span class="rstatus ${cls}">${label}</span></td>`+
-      `<td class="num">${r.code}</td><td>${r.msg}</td>`;
-    tb.appendChild(tr);
-  });
-  go("report");
-}
-function openReport(){
-  const skipped=rows.filter(r=>r.skip).map(r=>({uid:r.uid,status:"skipped",code:"—",msg:"手动跳过"}));
-  fillReport(document.getElementById("mfName").textContent,
-    new Date().toLocaleString("zh-CN",{hour12:false}),ok,bad,skip,results.concat(skipped));
-}
-function openHistoryReport(name,time,okN,badN,skipN){
-  const list=[];
-  for(let i=0;i<okN;i++)list.push({uid:randUid(),status:"success",code:200,msg:"verified via GET users/{uid}"});
-  for(let i=0;i<badN;i++)list.push({uid:randUid(),status:"failed",code:500,msg:"server error"});
-  for(let i=0;i<skipN;i++)list.push({uid:randUid(),status:"skipped",code:"—",msg:"手动跳过"});
-  fillReport(name,time,okN,badN,skipN,list);
-}
-function exportReport(){toast("export_report() → vrc-blocker_report.json 已导出");}
-
-/* ---------------- boot ---------------- */
-renderManifests();
-go("import");
-</script>
-</body>
+    <div class="toast" id="toast" hidden></div>
+  </body>
 </html>
