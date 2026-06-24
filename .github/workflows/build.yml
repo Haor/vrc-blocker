@@ -35,11 +35,12 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-      - name: Build Tauri bundles
+      - name: Build portable Windows executable
         uses: tauri-apps/tauri-action@v0
         with:
           projectPath: .
           tauriScript: npx --yes @tauri-apps/cli@2.11.3
+          args: --no-bundle
 
       - name: Stage Windows release assets
         shell: pwsh
@@ -56,23 +57,11 @@ jobs:
             throw "Portable Windows executable was not found."
           }
 
-          Copy-Item $portable.FullName (Join-Path $dist "VRC.Blocker_${version}_x64_portable.exe")
-
-          $bundleAssets = Get-ChildItem -Path "src-tauri/target/release/bundle" -Recurse -File |
-            Where-Object { $_.Extension -in ".exe", ".msi" }
-
-          if (-not $bundleAssets) {
-            throw "No Windows installer assets found."
-          }
-
-          foreach ($asset in $bundleAssets) {
-            $assetName = $asset.Name -replace " ", "."
-            Copy-Item $asset.FullName (Join-Path $dist $assetName)
-          }
+          Copy-Item $portable.FullName (Join-Path $dist "VRC.Blocker_${version}_x64.exe")
 
           Get-ChildItem -Path $dist -File | ForEach-Object { Write-Host $_.FullName }
 
-      - name: Upload bundles
+      - name: Upload executable artifact
         uses: actions/upload-artifact@v4
         with:
           name: vrc-blocker-windows-x64
