@@ -1,0 +1,12 @@
+/node_modules
+/src-tauri/gen
+/src-tauri/target
+/.DS_Store
+/dist
+/reports
+/.env
+/.env.*
+/local-test
+/*.local.csv
+/*.local.json
+/*.log
