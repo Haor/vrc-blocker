@@ -305,6 +305,10 @@ table.tb tr:last-child td{border-bottom:none;}
 table.tb tr:hover td{background:var(--canvas-soft);}
 .num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);}
 
+.report-list-card{flex:1;min-height:0;padding:0;overflow:hidden;display:flex;flex-direction:column;}
+.report-table-scroll{flex:1;min-height:0;overflow:auto;}
+.report-table-scroll table.tb thead th{position:sticky;top:0;background:var(--card);z-index:1;}
+
 /* toast */
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--ink);
   color:var(--canvas);padding:10px 18px;border-radius:var(--r-md);font-size:13px;opacity:0;pointer-events:none;
