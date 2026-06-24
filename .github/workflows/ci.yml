@@ -30,6 +30,7 @@ jobs:
           components: rustfmt
 
       - name: Rust cache
+        if: runner.os != 'Windows'
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
