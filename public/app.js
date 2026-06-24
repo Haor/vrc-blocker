@@ -9,9 +9,11 @@ const MANIFESTS_KEY = "vrc-blocker.manifests.v1";
 const HISTORY_KEY = "vrc-blocker.history.v1";
 const MANIFESTS_LIMIT = 100;
 const HISTORY_LIMIT = 50;
+const RUN_PROGRESS_EVENT = "vrc-blocker-run-progress";
 
 const tauriApi = window.__TAURI__;
 const invoke = tauriApi?.core?.invoke;
+const listen = tauriApi?.event?.listen;
 const currentWindow = tauriApi?.window?.getCurrentWindow?.();
 
 const state = {
@@ -31,6 +33,8 @@ const state = {
   toastTimer: null,
   runTimer: null,
   runInFlight: false,
+  runProgress: null,
+  runProgressUnlisten: null,
 };
 
 const I18N = {
@@ -1014,7 +1018,7 @@ function closeConfirm() {
   $("#mfEdit").style.display = "block";
 }
 
-/* ---------------- run（dry-run，后端一次性返回报告，前端按时间线逐条回放）--------------- */
+/* ---------------- run（后端事件实时推进，最终返回完整报告）--------------- */
 async function startRun() {
   if (state.runInFlight) return;
   const m = activeManifest();
@@ -1044,6 +1048,7 @@ async function startRun() {
   }
 
   enterRunPending(writableCount());
+  await attachRunProgress(writableCount());
 
   let report;
   try {
@@ -1057,6 +1062,7 @@ async function startRun() {
     });
   } catch (error) {
     state.runInFlight = false;
+    detachRunProgress();
     restoreConfirmAfterRunError();
     toast(errorMessage(error));
     return;
@@ -1075,7 +1081,12 @@ async function startRun() {
     reportTime: state.reportTime,
   });
 
-  playReport(report);
+  if (state.runProgress?.done > 0) {
+    renderMissingRunItems(report);
+    finishRun(report);
+  } else {
+    playReport(report);
+  }
 }
 
 function updateStartButton() {
@@ -1103,6 +1114,56 @@ function enterRunPending(total) {
   $("#cLeft").textContent = total;
   $("#fill").style.width = "0%";
   log("info", "", t("run.submitting"));
+}
+
+async function attachRunProgress(total) {
+  detachRunProgress();
+  state.runProgress = {
+    total,
+    done: 0,
+    ok: 0,
+    bad: 0,
+    skip: 0,
+    seenRows: new Set(),
+  };
+
+  if (!listen) return;
+
+  try {
+    state.runProgressUnlisten = await listen(RUN_PROGRESS_EVENT, (event) => {
+      handleRunProgress(event.payload);
+    });
+  } catch (error) {
+    console.warn("run progress listener unavailable", error);
+    state.runProgressUnlisten = null;
+  }
+}
+
+function detachRunProgress() {
+  clearInterval(state.runTimer);
+  const unlisten = state.runProgressUnlisten;
+  state.runProgressUnlisten = null;
+  if (typeof unlisten === "function") {
+    try { unlisten(); } catch (error) { console.warn("failed to unlisten run progress", error); }
+  }
+}
+
+function handleRunProgress(event) {
+  if (!state.runInFlight || !event || !state.runProgress) return;
+
+  if (event.phase === "started") {
+    const total = event.total ?? state.runProgress.total;
+    state.runProgress.total = total;
+    $("#frac").textContent = "0 / " + total;
+    $("#cLeft").textContent = total;
+    $("#fill").style.width = "0%";
+    log("start", "", t("run.startLog", { total }));
+    return;
+  }
+
+  if (event.phase === "item" && event.item) {
+    renderRunItem(event.item, event.total);
+  }
 }
 
 function restoreConfirmAfterRunError() {
@@ -1155,7 +1216,48 @@ function playReport(report) {
   }, 220);
 }
 
+function renderRunItem(item, eventTotal) {
+  const progress = state.runProgress;
+  if (!progress) return;
+
+  const key = `${item.rowIndex}:${item.uid}`;
+  if (progress.seenRows.has(key)) return;
+  progress.seenRows.add(key);
+
+  const meta = runItemMeta(item.status);
+  if (meta.bucket === "ok") progress.ok++;
+  else if (meta.bucket === "bad") progress.bad++;
+  else progress.skip++;
+
+  progress.done = progress.ok + progress.bad + progress.skip;
+  progress.total = eventTotal ?? progress.total;
+
+  const http = primaryHttpStatus(item);
+  const detail = itemDetail(item, meta);
+  log(meta.stage, shortUid(item.uid), `${http} · ${detail}`);
+  updateRunProgressCounters(progress);
+}
+
+function renderMissingRunItems(report) {
+  const progress = state.runProgress;
+  if (!progress) return;
+  for (const item of report.items || []) {
+    renderRunItem(item, report.summary?.total);
+  }
+}
+
+function updateRunProgressCounters(progress) {
+  const total = progress.total || progress.done;
+  $("#frac").textContent = progress.done + " / " + total;
+  $("#cOk").textContent = progress.ok;
+  $("#cBad").textContent = progress.bad;
+  $("#cSkip").textContent = progress.skip;
+  $("#cLeft").textContent = Math.max(total - progress.done, 0);
+  $("#fill").style.width = Math.round((progress.done / Math.max(total, 1)) * 100) + "%";
+}
+
 function finishRun(report) {
+  detachRunProgress();
   state.runInFlight = false;
   updateStartButton();
   $("#sDot").className = "dot " + sessionDotClass(state.session?.sessionState || "unknown");
@@ -1220,7 +1322,7 @@ function noteNeedsAttention(item) {
 }
 
 function backToList() {
-  clearInterval(state.runTimer);
+  detachRunProgress();
   state.runInFlight = false;
   renderManifests();
   go("import");

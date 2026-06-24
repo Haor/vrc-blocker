@@ -5,10 +5,13 @@ use crate::models::{RunReport, SessionState, StartRunRequest};
 use crate::run_engine;
 use crate::session::{AppState, SessionSnapshot};
 use crate::vrchat::auth::AuthUserResponse;
-use tauri::State;
+use tauri::{AppHandle, Emitter, State};
+
+pub const RUN_PROGRESS_EVENT: &str = "vrc-blocker-run-progress";
 
 #[tauri::command]
 pub async fn start_block_run(
+    app: AppHandle,
     state: State<'_, AppState>,
     mut request: StartRunRequest,
 ) -> Result<RunReport, String> {
@@ -48,7 +51,13 @@ pub async fn start_block_run(
     };
 
     request.account = Some(account.clone());
-    let report = run_engine::execute_block_run(request, &client, &settings.retry_policy).await;
+    let report = run_engine::execute_block_run(request, &client, &settings.retry_policy, {
+        let app = app.clone();
+        move |event| {
+            let _ = app.emit(RUN_PROGRESS_EVENT, event);
+        }
+    })
+    .await;
 
     state
         .save_session(&SessionSnapshot {

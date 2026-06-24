@@ -1,6 +1,6 @@
 use crate::models::{
-    OperationResult, RetryPolicy, RunItemResult, RunItemStatus, RunReport, RunSummary,
-    StartRunRequest,
+    OperationResult, RetryPolicy, RunItemResult, RunItemStatus, RunProgressEvent, RunProgressPhase,
+    RunReport, RunSummary, StartRunRequest,
 };
 use crate::vrchat::client::{ApiResponse, VrchatClient};
 use crate::vrchat::moderation::PlayerModeration;
@@ -90,11 +90,15 @@ pub fn build_scaffold_report(request: StartRunRequest) -> RunReport {
     }
 }
 
-pub async fn execute_block_run(
+pub async fn execute_block_run<F>(
     request: StartRunRequest,
     client: &VrchatClient,
     policy: &RetryPolicy,
-) -> RunReport {
+    mut on_progress: F,
+) -> RunReport
+where
+    F: FnMut(RunProgressEvent),
+{
     if request.dry_run {
         return build_scaffold_report(request);
     }
@@ -104,8 +108,11 @@ pub async fn execute_block_run(
     let manifest_name = request.manifest_name.clone();
     let account = request.account.clone();
     let rows = request.rows;
+    let total = rows.len();
     let mut items = Vec::with_capacity(rows.len());
     let mut stop_error: Option<String> = None;
+
+    on_progress(started_event(&run_id, total));
 
     let moderation_fetch = retry_api(policy, || client.player_moderations()).await;
     let mut blocked = match moderation_fetch {
@@ -113,21 +120,25 @@ pub async fn execute_block_run(
         Err(error) => {
             let message = format!("读取当前 block 列表失败：{error}");
             for row in rows {
-                items.push(failed_item(
+                let item = failed_item(
                     row.row_index,
                     row.uid,
                     row.normalized_memo,
                     message.clone(),
                     1,
-                ));
+                );
+                on_progress(item_event(&run_id, total, items.len() + 1, item.clone()));
+                items.push(item);
             }
-            return finish_report(manifest_name, account, started_at, run_id, items);
+            let report = finish_report(manifest_name, account, started_at, run_id, items);
+            on_progress(finished_event(&report));
+            return report;
         }
     };
 
     for row in rows {
         if row.skip {
-            items.push(RunItemResult {
+            let item = RunItemResult {
                 row_index: row.row_index,
                 uid: row.uid,
                 memo: row.normalized_memo,
@@ -136,18 +147,22 @@ pub async fn execute_block_run(
                 block: None,
                 attempts: 0,
                 error: None,
-            });
+            };
+            on_progress(item_event(&run_id, total, items.len() + 1, item.clone()));
+            items.push(item);
             continue;
         }
 
         if let Some(error) = stop_error.as_ref() {
-            items.push(failed_item(
+            let item = failed_item(
                 row.row_index,
                 row.uid,
                 row.normalized_memo,
                 format!("任务已停止，未执行：{error}"),
                 0,
-            ));
+            );
+            on_progress(item_event(&run_id, total, items.len() + 1, item.clone()));
+            items.push(item);
             continue;
         }
 
@@ -173,11 +188,50 @@ pub async fn execute_block_run(
             stop_error = item.error.clone();
         }
 
+        on_progress(item_event(&run_id, total, items.len() + 1, item.clone()));
         items.push(item);
         sleep(normal_item_delay(row_index)).await;
     }
 
-    finish_report(manifest_name, account, started_at, run_id, items)
+    let report = finish_report(manifest_name, account, started_at, run_id, items);
+    on_progress(finished_event(&report));
+    report
+}
+
+fn started_event(run_id: &str, total: usize) -> RunProgressEvent {
+    RunProgressEvent {
+        phase: RunProgressPhase::Started,
+        run_id: run_id.to_string(),
+        total,
+        done: 0,
+        item: None,
+        summary: None,
+        message: Some("run started".to_string()),
+    }
+}
+
+fn item_event(run_id: &str, total: usize, done: usize, item: RunItemResult) -> RunProgressEvent {
+    RunProgressEvent {
+        phase: RunProgressPhase::Item,
+        run_id: run_id.to_string(),
+        total,
+        done,
+        item: Some(item),
+        summary: None,
+        message: None,
+    }
+}
+
+fn finished_event(report: &RunReport) -> RunProgressEvent {
+    RunProgressEvent {
+        phase: RunProgressPhase::Finished,
+        run_id: report.run_id.clone(),
+        total: report.summary.total,
+        done: report.summary.total,
+        item: None,
+        summary: Some(report.summary.clone()),
+        message: Some("run finished".to_string()),
+    }
 }
 
 async fn execute_one(

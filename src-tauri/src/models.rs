@@ -168,6 +168,26 @@ pub struct RunReport {
     pub items: Vec<RunItemResult>,
 }
 
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RunProgressEvent {
+    pub phase: RunProgressPhase,
+    pub run_id: String,
+    pub total: usize,
+    pub done: usize,
+    pub item: Option<RunItemResult>,
+    pub summary: Option<RunSummary>,
+    pub message: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RunProgressPhase {
+    Started,
+    Item,
+    Finished,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct RunSummary {
