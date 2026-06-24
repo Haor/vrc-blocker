@@ -35,10 +35,9 @@ body{
 .cap{font-size:11px;font-weight:600;letter-spacing:.88px;text-transform:uppercase;color:var(--muted);}
 
 /* ============================== WINDOW =============================== */
-/* Tauri：透明原生窗口 + 自绘圆角；留 1px 边框收边 */
+/* Tauri：透明原生窗口 + 自绘圆角；无边框，避免圆角曲线处的半透明灰边雾化 */
 .app{position:fixed;inset:0;display:flex;flex-direction:column;
-  background:var(--card);overflow:hidden;border-radius:12px;
-  border:1px solid rgba(38,37,30,.12);}
+  background:var(--card);overflow:hidden;border-radius:12px;}
 
 /* ---- titlebar — 整条可拖拽，按平台显示原生习惯控件 ---- */
 .titlebar{height:42px;flex:none;display:flex;align-items:center;padding:0 14px;position:relative;
