@@ -160,6 +160,8 @@ input[type=text],input[type=password],input[type=number],input[type=search],sele
   transition:border-color .12s,box-shadow .12s;}
 input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
 input::placeholder,textarea::placeholder{color:var(--muted-soft);}
+input[type=password]::-ms-reveal,
+input[type=password]::-ms-clear{display:none;}
 textarea{resize:vertical;min-height:104px;line-height:1.6;}
 .pass-wrap{position:relative;}
 .pass-wrap input{padding-right:46px;}
