@@ -1,261 +1,320 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VRC Blocker</title>
-    <link rel="stylesheet" href="./styles.css" />
-    <script defer src="./app.js"></script>
-  </head>
-  <body>
-    <div class="app-shell">
-      <header class="titlebar" data-tauri-drag-region>
-        <div class="window-controls" aria-label="窗口控制">
-          <button class="window-control close" id="windowCloseButton" type="button" aria-label="关闭窗口"></button>
-          <button class="window-control minimize" id="windowMinimizeButton" type="button" aria-label="最小化窗口"></button>
-          <button class="window-control maximize" id="windowMaximizeButton" type="button" aria-label="最大化窗口"></button>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>vrc-blocker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+<div class="app">
+
+  <!-- ============================== TITLEBAR ============================= -->
+  <div class="titlebar" data-tauri-drag-region>
+    <div class="lights mac-window-controls">
+      <button class="tl c" id="windowCloseButton" type="button" aria-label="关闭窗口"></button>
+      <button class="tl y" id="windowMinimizeButton" type="button" aria-label="最小化窗口"></button>
+      <button class="tl g" id="windowMaximizeButton" type="button" aria-label="最大化窗口"></button>
+    </div>
+    <div class="win-window-controls">
+      <button class="win-control min" id="winWindowMinimizeButton" type="button" aria-label="最小化窗口">
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5h8"/></svg>
+      </button>
+      <button class="win-control max" id="winWindowMaximizeButton" type="button" aria-label="最大化窗口">
+        <svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2.5" y="2.5" width="7" height="7"/></svg>
+      </button>
+      <button class="win-control close" id="winWindowCloseButton" type="button" aria-label="关闭窗口">
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3L3 9"/></svg>
+      </button>
+    </div>
+    <div class="wtitle" data-tauri-drag-region>
+      <span class="logo ico" data-tauri-drag-region>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9"/><line x1="5.6" y1="5.6" x2="18.4" y2="18.4"/>
+        </svg>
+      </span>
+      <span data-tauri-drag-region>vrc-blocker</span>
+      <span class="wv" data-tauri-drag-region>v0.1.0</span>
+    </div>
+  </div>
+
+  <div class="shell">
+
+  <!-- ============================== SIDEBAR ============================== -->
+  <aside class="side">
+    <div class="acct" id="acct">
+      <div class="acctIn">
+        <div class="acctMain">
+          <div class="nm"><span class="dot" id="sDot"></span><span id="sName">会话未验证</span></div>
+          <div class="uid" id="sUid">等待登录</div>
         </div>
-        <div class="window-title" data-tauri-drag-region>
-          <span class="window-logo" data-tauri-drag-region>⊘</span>
-          <span data-tauri-drag-region>vrc-blocker</span>
-          <span class="window-version" data-tauri-drag-region>v0.1.0</span>
+        <button class="iconbtn danger" id="logoutButton" title="登出账号" aria-label="登出账号">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
+      <button class="acctOut" id="accountButton">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </span> 登录 VRChat
+      </button>
+    </div>
+
+    <div class="side-label">工作区</div>
+    <nav class="nav">
+      <button class="nitem active" data-go="import"><span class="g">›</span> 名单</button>
+      <button class="nitem" data-go="history"><span class="g">›</span> 历史</button>
+    </nav>
+
+    <div class="side-foot">
+      <button class="sf-link" id="openSettings">语言</button>
+      <div class="sf-ver">vrc-blocker · v0.1.0</div>
+    </div>
+  </aside>
+
+  <!-- =============================== MAIN ================================ -->
+  <main class="main">
+
+    <!-- -------- 屏蔽名单（主工作台：导入 / 管理 / 进入编辑执行） -------- -->
+    <section class="screen active" id="s-import">
+      <div class="page-head">
+        <div>
+          <h1>屏蔽名单</h1>
+          <p class="lead">导入并管理你的屏蔽名单（<span class="hl">uid,备注</span> 两列）。点开名单可编辑备注、执行屏蔽并查看报告。</p>
         </div>
-      </header>
+        <div class="page-actions">
+          <button class="btn" id="exampleButton">下载示例 CSV</button>
+          <button class="btn primary" id="importButton">导入 CSV</button>
+          <input id="csvInput" type="file" accept=".csv,text/csv" hidden />
+        </div>
+      </div>
 
-      <div class="workspace">
-      <aside class="sidebar" aria-label="主导航">
-        <header class="brand">
-          <div class="brand-mark">VB</div>
-          <div>
-            <div class="brand-name">VRC Blocker</div>
-            <div class="brand-version">0.1.0</div>
-          </div>
-        </header>
+      <div class="stats" style="margin-bottom:16px">
+        <div class="stat"><div class="n" id="stMf">0</div><div class="l">名单</div></div>
+        <div class="stat accent"><div class="n" id="stPending">0</div><div class="l">待执行</div></div>
+        <div class="stat ok"><div class="n" id="stBlocked">0</div><div class="l">累计屏蔽</div></div>
+      </div>
 
-        <section class="account-panel" aria-label="账号状态">
-          <button class="account-button" id="accountButton" type="button">
-            <span class="session-dot" id="sessionDot"></span>
-            <span>
-              <span class="account-name" id="accountName">会话未验证</span>
-              <span class="account-meta" id="accountMeta">等待登录</span>
-            </span>
-          </button>
-        </section>
+      <div class="panel">
+        <div class="panel-hd"><span class="panel-title">全部名单</span><span class="muted" id="mfCountLbl">0 份</span></div>
+        <div class="panel-bd" id="mfList">
+          <div class="panel-empty">还没有导入 CSV。点击右上角"导入 CSV"开始。</div>
+        </div>
+      </div>
+    </section>
 
-        <nav class="nav-list" aria-label="页面">
-          <button class="nav-item active" data-view="import" type="button">
-            <span class="nav-icon">＋</span>
-            <span>导入</span>
-          </button>
-          <button class="nav-item" data-view="history" type="button">
-            <span class="nav-icon">▦</span>
-            <span>历史</span>
-          </button>
-        </nav>
+    <!-- -------- 名单详情：编辑 + 执行 + 时间线 -------- -->
+    <section class="screen" id="s-manifest">
+      <div class="h">
+        <button class="btn ghost sm" id="backToImportButton">← 名单</button>
+        <h1 id="mfName" class="mono" style="font-size:18px">未选择名单</h1>
+      </div>
 
-        <footer class="sidebar-footer">
-          <button class="sidebar-link" id="refreshSessionButton" type="button">
-            刷新会话
-          </button>
-          <button class="sidebar-link" id="logoutButton" type="button">
-            退出登录
-          </button>
-          <div class="runtime-state" id="runtimeState">运行时检查中</div>
-        </footer>
-      </aside>
-
-      <main class="main">
-        <section class="view active" id="importView" aria-labelledby="importTitle">
-          <div class="page-head">
-            <div>
-              <h1 id="importTitle">导入名单</h1>
-              <p class="page-copy">
-                CSV 只读取 <code>uid</code> 和 <code>memo</code>。执行时会先覆盖线上备注，再屏蔽玩家。
-              </p>
-            </div>
-            <div class="page-actions">
-              <button class="button" id="exampleButton" type="button">下载示例 CSV</button>
-              <button class="button primary" id="importButton" type="button">导入 CSV</button>
-              <input id="csvInput" type="file" accept=".csv,text/csv" hidden />
+      <!-- 编辑模式 -->
+      <div id="mfEdit">
+        <div class="editor">
+          <div class="elist">
+            <div class="tb"><input type="text" id="rowSearch" placeholder="搜索 UID / 备注…"></div>
+            <div class="rows" id="editRows">
+              <div class="panel-empty">选择一个名单开始编辑</div>
             </div>
           </div>
-
-          <div class="notice" id="scaffoldNotice">
-            <strong>当前状态</strong>
-            <span>导入、校验、编辑和 dry-run 报告已接后端；真实登录、写备注和屏蔽执行仍在后端接线中。</span>
+          <div class="detail card">
+            <div class="hd">
+              <span id="dUid" class="mono" style="font-size:12px;color:var(--muted);flex:1;word-break:break-all">usr_…</span>
+              <button class="btn ghost sm" id="skipBtn">跳过</button>
+            </div>
+            <div class="field"><label>备注 (memo)</label>
+              <textarea id="dMemo"></textarea>
+              <div class="counter" id="dCount">0 / 256</div></div>
+            <div id="issueList"></div>
+            <div class="note"><span class="i">i</span><div>备注将写入 <span class="hl">VRChat 线上备注</span>，跟随账号同步。</div></div>
           </div>
+        </div>
 
-          <div class="stat-grid" id="importStats" aria-label="导入统计"></div>
+        <div class="btnrow">
+          <span class="muted" id="editSummary">0 人将屏蔽 · 0 跳过</span>
+          <span class="spring"></span>
+          <button class="btn primary" id="openConfirmButton">执行屏蔽 <span class="k">→</span></button>
+        </div>
+      </div>
 
-          <section class="panel">
-            <div class="panel-head">
-              <span>导入批次</span>
-              <span class="panel-count" id="manifestCount">0</span>
-            </div>
-            <div class="manifest-list" id="manifestList"></div>
-          </section>
-        </section>
+      <!-- 执行确认 -->
+      <div id="mfConfirm" style="display:none">
+        <p class="lead">单账号串行执行。正常请求只加小抖动；429/5xx 按 Retry-After 或指数退避，<b>401/403 立即停止</b>。</p>
+        <div class="card">
+          <dl class="kv">
+            <dt>账号</dt><dd id="cfAccount">—</dd>
+            <dt>将屏蔽</dt><dd><span class="hl" id="cfWrite">0</span> 人</dd>
+            <dt>API</dt><dd><span class="api">POST /api/1/userNotes</span> <span class="api">POST /api/1/auth/user/playermoderations</span></dd>
+          </dl>
+          <label class="confirm-box">
+            <input type="checkbox" id="chk">
+            <span>我确认屏蔽以上账号，并覆盖写入线上备注。</span>
+          </label>
+          <div class="btnrow">
+            <button class="btn ghost" id="closeConfirmButton">← 返回编辑</button>
+            <span class="spring"></span>
+            <button class="btn primary" id="startBtn" disabled>开始屏蔽 <span class="k">↵</span></button>
+          </div>
+        </div>
+      </div>
 
-        <section class="view" id="editorView" aria-labelledby="editorTitle">
-          <div class="page-head">
-            <div>
-              <button class="back-link" id="backToImportButton" type="button">← 返回</button>
-              <h1 id="editorTitle">编辑确认</h1>
-              <p class="page-copy" id="editorSubtitle">未选择批次</p>
-            </div>
-            <div class="page-actions">
-              <button class="button" id="dryRunButton" type="button">生成 dry-run 报告</button>
-              <button class="button primary" id="confirmButton" type="button">确认执行</button>
+      <!-- 执行中 / 完成 -->
+      <div id="mfRun" style="display:none">
+        <p class="lead" id="runLead">屏蔽中…实时显示每条备注写入与 block 执行进度。</p>
+
+        <div class="proghead"><span class="cap">执行进度</span><span id="frac" class="mono" style="color:var(--ink)">0 / 0</span></div>
+        <div class="bar"><div class="fill" id="fill"></div></div>
+
+        <div class="stats" style="margin-top:18px">
+          <div class="stat ok"><div class="n" id="cOk">0</div><div class="l">成功</div></div>
+          <div class="stat bad"><div class="n" id="cBad">0</div><div class="l">失败</div></div>
+          <div class="stat skip"><div class="n" id="cSkip">0</div><div class="l">跳过</div></div>
+          <div class="stat"><div class="n" id="cLeft">0</div><div class="l">剩余</div></div>
+        </div>
+
+        <div class="timeline" id="term"></div>
+
+        <div class="btnrow">
+          <button class="btn ghost" id="backBtn">返回名单</button>
+          <span class="spring"></span>
+          <button class="btn primary" id="reportBtn">查看报告 <span class="k">→</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- -------- 执行报告 -------- -->
+    <section class="screen" id="s-report">
+      <div class="h">
+        <button class="btn ghost sm" id="backToManifestButton">← 名单</button>
+        <h1>执行报告</h1>
+      </div>
+      <p class="lead">本次屏蔽执行的完整结果。可导出 JSON 存档，或追溯失败条目重试。</p>
+
+      <div class="card" style="margin-bottom:14px">
+        <dl class="kv">
+          <dt>名单</dt><dd class="mono" id="rpName">—</dd>
+          <dt>账号</dt><dd id="rpAccount">—</dd>
+          <dt>时间</dt><dd id="rpTime">—</dd>
+          <dt>API</dt><dd><span class="api">POST /api/1/userNotes</span> <span class="api">POST /api/1/auth/user/playermoderations</span></dd>
+        </dl>
+      </div>
+
+      <div class="stats" style="margin-bottom:14px">
+        <div class="stat ok"><div class="n" id="rpOk">0</div><div class="l">成功</div></div>
+        <div class="stat bad"><div class="n" id="rpBad">0</div><div class="l">失败</div></div>
+        <div class="stat skip"><div class="n" id="rpSkip">0</div><div class="l">跳过</div></div>
+        <div class="stat"><div class="n" id="rpTotal">0</div><div class="l">总计</div></div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="tb">
+          <thead><tr><th>UID</th><th>状态</th><th class="num">HTTP</th><th>详情</th></tr></thead>
+          <tbody id="rpRows"></tbody>
+        </table>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn ghost" id="exportFailedCsvButton">导出失败 CSV</button>
+        <span class="spring"></span>
+        <button class="btn ghost" id="backToListButton">返回名单</button>
+        <button class="btn primary" id="exportJsonButton">导出 JSON</button>
+      </div>
+    </section>
+
+    <!-- -------- 历史 -------- -->
+    <section class="screen" id="s-history">
+      <div class="h"><h1>历史</h1></div>
+      <p class="lead">执行记录，可重新打开报告或导出失败 CSV。</p>
+      <div class="panel">
+        <div class="panel-hd"><span class="panel-title">执行记录</span><span class="muted" id="historyCountLbl">0 条</span></div>
+        <div class="panel-bd" id="historyList">
+          <div class="panel-empty">暂无本地历史</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  </div><!-- /shell -->
+
+  <!-- ============================ LOGIN MODAL =========================== -->
+  <div class="modal-backdrop" id="loginModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <div class="modal-hd">
+        <h2 id="loginTitle">登录 VRChat</h2>
+      </div>
+      <div class="modal-bd">
+        <div id="loginStep1">
+          <div class="field">
+            <label for="loginUser">用户名或邮箱 <span class="req">*</span></label>
+            <input id="loginUser" type="text" placeholder="username 或 you@example.com" />
+          </div>
+          <div class="field">
+            <label for="loginPass">密码 <span class="req">*</span></label>
+            <div class="pass-wrap">
+              <input id="loginPass" type="password" placeholder="password" />
+              <button class="pass-toggle" id="togglePasswordButton" type="button" aria-label="显示密码" title="显示密码">
+                <svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
+                  <path d="M3 3l18 18"/>
+                  <path d="M10.6 10.6A3 3 0 0 0 12 15a3 3 0 0 0 2.4-4.8"/>
+                  <path d="M9.9 4.4A10.5 10.5 0 0 1 12 4.2c6.5 0 10 7 10 7a18.4 18.4 0 0 1-3.1 4.2"/>
+                  <path d="M6.6 6.7C3.7 8.6 2 12 2 12s3.5 7 10 7a10.1 10.1 0 0 0 5.3-1.5"/>
+                </svg>
+              </button>
             </div>
           </div>
-
-          <div class="stat-grid" id="editorStats" aria-label="批次统计"></div>
-
-          <div class="editor-layout">
-            <section class="row-panel" aria-label="名单条目">
-              <div class="search-box">
-                <input id="rowSearch" type="search" placeholder="搜索 UID 或 memo" />
-              </div>
-              <div class="row-list" id="rowList"></div>
-            </section>
-
-            <section class="detail-panel" aria-label="条目详情">
-              <div class="detail-empty" id="detailEmpty">选择一条记录</div>
-              <div class="detail-body" id="detailBody" hidden>
-                <div class="detail-row">
-                  <span class="label">UID</span>
-                  <code id="selectedUid"></code>
-                </div>
-                <label class="field">
-                  <span>备注</span>
-                  <textarea id="memoEditor" rows="7"></textarea>
-                </label>
-                <div class="memo-meter">
-                  <span id="memoCount">0 / 256</span>
-                  <span id="normalizedHint">已按 VRChat 写入前规则规整空白</span>
-                </div>
-                <label class="checkbox-line">
-                  <input id="skipToggle" type="checkbox" />
-                  <span>跳过此条</span>
-                </label>
-                <div class="issue-list" id="issueList"></div>
-              </div>
-            </section>
+        </div>
+        <div id="twofa" style="display:none">
+          <p class="modal-prompt">需要两步验证。请输入验证器 App 生成的 6 位 TOTP 验证码。</p>
+          <div class="field">
+            <label for="otpCode">验证码</label>
+            <input id="otpCode" class="codeinput" type="text" inputmode="numeric" maxlength="6" placeholder="000000" />
           </div>
-        </section>
-
-        <section class="view" id="runView" aria-labelledby="runTitle">
-          <div class="page-head">
-            <div>
-              <button class="back-link" id="backToEditorButton" type="button">← 返回编辑</button>
-              <h1 id="runTitle">执行报告</h1>
-              <p class="page-copy" id="runSubtitle">等待执行</p>
-            </div>
-            <div class="page-actions">
-              <button class="button" id="exportJsonButton" type="button">导出 JSON</button>
-              <button class="button" id="exportFailedCsvButton" type="button">导出失败 CSV</button>
-            </div>
-          </div>
-
-          <div class="stat-grid" id="reportStats" aria-label="报告统计"></div>
-          <section class="panel">
-            <div class="panel-head">
-              <span>条目结果</span>
-              <span class="panel-count" id="reportCount">0</span>
-            </div>
-            <div class="report-list" id="reportList"></div>
-          </section>
-        </section>
-
-        <section class="view" id="historyView" aria-labelledby="historyTitle">
-          <div class="page-head">
-            <div>
-              <h1 id="historyTitle">历史报告</h1>
-              <p class="page-copy">本地报告保存尚未接线。</p>
-            </div>
-          </div>
-          <section class="empty-state">
-            <div class="empty-mark">▦</div>
-            <h2>暂无本地历史</h2>
-            <p>当前运行只保留内存中的最新报告。</p>
-          </section>
-        </section>
-      </main>
+        </div>
+        <div class="modal-status" id="loginState"></div>
+      </div>
+      <div class="modal-ft">
+        <button class="btn ghost" id="loginCancel">取消</button>
+        <button class="btn primary" id="loginBtn">登录 <span class="k">↵</span></button>
       </div>
     </div>
+  </div>
 
-    <div class="modal-backdrop" id="loginModal" hidden>
-      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-        <div class="modal-head">
-          <h2 id="loginTitle">VRChat 登录</h2>
-          <button class="icon-button" id="closeLoginButton" type="button" aria-label="关闭">×</button>
+  <!-- ============================ SETTINGS MODAL ======================== -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+      <div class="modal-hd"><h2 id="setTitle">语言</h2></div>
+      <div class="modal-bd">
+        <div class="field">
+          <label>界面语言</label>
+          <div class="seg" id="langSeg">
+            <button class="on" data-lang="zh">中文</button>
+            <button data-lang="ja">日本語</button>
+            <button data-lang="en">English</button>
+          </div>
         </div>
-        <form id="loginForm" class="modal-body">
-          <label class="field">
-            <span>用户名或邮箱</span>
-            <input id="loginUser" autocomplete="username" required />
-          </label>
-          <label class="field">
-            <span>密码</span>
-            <input id="loginPassword" type="password" autocomplete="current-password" required />
-          </label>
-          <div class="split-fields">
-            <label class="field">
-              <span>代理</span>
-              <select id="proxyMode">
-                <option value="system">系统</option>
-                <option value="direct">直连</option>
-                <option value="custom">自定义</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>代理地址</span>
-              <input id="proxyUrl" placeholder="http://127.0.0.1:7890" />
-            </label>
-          </div>
-          <div class="form-error" id="loginError" hidden></div>
-          <div class="modal-actions">
-            <button class="button" id="cancelLoginButton" type="button">取消</button>
-            <button class="button primary" id="submitLoginButton" type="submit">登录</button>
-          </div>
-        </form>
-
-        <form id="twoFactorForm" class="modal-body" hidden>
-          <p class="page-copy" id="twoFactorMessage">输入二步验证码。</p>
-          <label class="field">
-            <span>验证码</span>
-            <input id="twoFactorCode" inputmode="numeric" autocomplete="one-time-code" />
-          </label>
-          <div class="form-error" id="twoFactorError" hidden></div>
-          <div class="modal-actions">
-            <button class="button" id="backToLoginButton" type="button">返回</button>
-            <button class="button primary" type="submit">验证</button>
-          </div>
-        </form>
-      </section>
+      </div>
+      <div class="modal-ft">
+        <button class="btn primary" id="closeSettings">完成</button>
+      </div>
     </div>
+  </div>
 
-    <div class="modal-backdrop" id="confirmModal" hidden>
-      <section class="modal compact" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
-        <div class="modal-head">
-          <h2 id="confirmTitle">确认执行</h2>
-          <button class="icon-button" id="closeConfirmButton" type="button" aria-label="关闭">×</button>
-        </div>
-        <div class="modal-body">
-          <p class="page-copy" id="confirmCopy">准备执行。</p>
-          <div class="confirm-metrics" id="confirmMetrics"></div>
-          <div class="notice danger">
-            <strong>覆盖策略</strong>
-            <span>线上 userNotes 会被 CSV 中的 memo 直接覆盖。</span>
-          </div>
-          <div class="modal-actions">
-            <button class="button" id="cancelConfirmButton" type="button">取消</button>
-            <button class="button primary" id="runConfirmedButton" type="button">执行 dry-run</button>
-          </div>
-        </div>
-      </section>
-    </div>
+</div><!-- /app -->
 
-    <div class="toast" id="toast" hidden></div>
-  </body>
+<div id="toast"></div>
+
+<script src="./app.js"></script>
+</body>
 </html>

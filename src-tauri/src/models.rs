@@ -12,7 +12,7 @@ pub struct AccountSession {
     pub last_validated_at: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub enum SessionState {
     Unknown,

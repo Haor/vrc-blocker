@@ -1,58 +1,64 @@
 # VRC Blocker
 
-独立的 VRChat 批量屏蔽小工具。它导入 `uid,memo` CSV，执行 VRChat player moderation `block`，并把 `memo` 覆盖写入对应玩家的在线 `userNotes`。
+VRC Blocker 是一个用于 VRChat 的批量屏蔽工具。
 
-这个项目不依赖 VRCX 数据库，也不读取当前目录里的真实名单文件。真实名单只是可选输入源。
+它可以导入包含玩家 UID 和备注的 CSV 文件，逐条把备注覆盖写入对应玩家的线上备注，然后执行屏蔽。适合把已经整理好的名单快速应用到自己的 VRChat 账号上。
 
-## 技术栈
+## 功能
 
-- Tauri v2
-- Rust 后端：登录、Cookie、VRChat API、CSV、执行队列、退避、报告
-- 静态 HTML/CSS/JS 前端：无 React、无 Vite、无运行期 Node 依赖
-
-最终用户只需要运行打包出的桌面程序。开发时需要 Rust/Tauri CLI；本机已经可以用 `cargo tauri`。
-
-## 当前骨架
-
-- `public/`：按 UI prototype 适配后的 Tauri 静态前端，包含自定义可拖动标题栏、CSV 导入、编辑、确认和 dry-run 报告入口。
-- `src-tauri/src/commands/`：前端可调用的 Tauri commands。
-- `src-tauri/src/vrchat/`：VRChat API client 边界。
-- `src-tauri/src/import/`：CSV 解析与校验。
-- `src-tauri/src/run_engine/`：执行报告与退避策略入口。
-- `docs/`：后端契约、报告 JSON、限速退避说明、原型参考。
-- `examples/example.csv`：脱敏示例 CSV。
-- `.github/workflows/`：跨平台测试和多平台 Tauri 构建。
-
-## 开发命令
-
-```bash
-cargo tauri dev
-cargo tauri build
-```
-
-Rust 单元测试：
-
-```bash
-cargo test --manifest-path src-tauri/Cargo.toml
-```
-
-本地 Tauri debug build：
-
-```bash
-cargo tauri build --debug --no-bundle
-```
+- 导入 `uid,memo` 两列 CSV。
+- 在执行前查看、编辑每条备注。
+- 可以跳过不想处理的条目。
+- 登录 VRChat 后批量执行屏蔽。
+- 执行时会显示每条记录的进度。
+- 执行完成后可以查看报告。
+- 可以导出报告 JSON 或失败 CSV。
+- 导入的名单和执行历史会保存在本机，下次打开仍可查看。
 
 ## CSV 格式
+
+CSV 只需要两列：`uid` 和 `memo`。
 
 ```csv
 uid,memo
 usr_00000000-0000-4000-8000-000000000001,风险等级：高；类别：示例；名称：示例用户A；来源：示例名单；原因：示例原因；备注：演示数据
+usr_00000000-0000-4000-8000-000000000002,风险等级：中；类别：示例；名称：示例用户B；来源：示例名单；原因：示例原因；备注：演示数据
 ```
 
-`memo` 是最终写入 VRChat 在线 `userNotes` 的文本。工具只校验长度和可写性，不理解备注语义，不生成备注格式。
+`uid` 必须是 VRChat 用户 ID，通常以 `usr_` 开头。
 
-## 安全边界
+`memo` 是最终写入线上备注的完整文本。执行时会直接覆盖该玩家已有的线上备注。
 
-- 不提交真实名单、VRCX 数据库、Cookie、报告或本地测试 CSV。
-- 线上 smoke test 使用本机 VRCX Cookie 时，只从真实名单中临时选 1-2 条写入 `local-test/`，该目录被 git 忽略。
-- 批量真实屏蔽必须经过确认页；默认开发路径先 dry-run。
+## 使用方法
+
+1. 打开 VRC Blocker。
+2. 点击 `导入 CSV`，选择准备好的名单文件。
+3. 进入名单详情页，检查 UID 和备注。
+4. 如有需要，编辑备注或跳过某些条目。
+5. 登录 VRChat 账号。
+6. 点击 `执行屏蔽`。
+7. 确认将要屏蔽的人数，并勾选确认框。
+8. 点击 `开始屏蔽`。
+9. 等待执行完成，查看报告。
+
+## 执行结果
+
+执行报告会显示每条记录的状态：
+
+- `成功`：备注已提交，屏蔽已完成。
+- `已屏蔽`：目标执行前已经在屏蔽列表中，工具仍会覆盖备注。
+- `跳过`：用户在名单里手动跳过。
+- `失败`：备注提交、登录状态、网络请求或屏蔽验证失败。
+
+如果出现失败条目，可以从报告页导出失败 CSV，修正后重新导入执行。
+
+## 本地保存
+
+工具会在本机保存：
+
+- 已导入的名单。
+- 编辑后的备注和跳过状态。
+- 执行历史。
+- 执行报告。
+
+登录会话也会保存在本机，用于下次打开时继续使用。密码不会作为明文保存在名单或报告中。

@@ -8,6 +8,7 @@
   },
   "app": {
     "withGlobalTauri": true,
+    "macOSPrivateApi": true,
     "windows": [
       {
         "title": "VRC Blocker",
@@ -16,6 +17,7 @@
         "minWidth": 980,
         "minHeight": 640,
         "decorations": false,
+        "transparent": true,
         "resizable": true,
         "fullscreen": false
       }
