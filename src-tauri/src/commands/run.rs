@@ -2,9 +2,11 @@ use crate::commands::auth::{account_from_current_user, build_client};
 use crate::error::AppError;
 use crate::import::validation;
 use crate::models::{RunReport, SessionState, StartRunRequest};
-use crate::run_engine;
+use crate::run_engine::{self, retry_api};
 use crate::session::{AppState, SessionSnapshot};
 use crate::vrchat::auth::AuthUserResponse;
+use crate::vrchat::client::VrchatClient;
+use std::collections::HashSet;
 use tauri::{AppHandle, Emitter, State};
 
 pub const RUN_PROGRESS_EVENT: &str = "vrc-blocker-run-progress";
@@ -51,13 +53,21 @@ pub async fn start_block_run(
     };
 
     request.account = Some(account.clone());
-    let report = run_engine::execute_block_run(request, &client, &settings.retry_policy, {
-        let app = app.clone();
-        move |event| {
-            let _ = app.emit(RUN_PROGRESS_EVENT, event);
-        }
-    })
-    .await;
+
+    let friend_uids = if request.skip_friends {
+        collect_friend_uids(&client, &settings.retry_policy).await
+    } else {
+        HashSet::new()
+    };
+
+    let report =
+        run_engine::execute_block_run(request, &client, &settings.retry_policy, &friend_uids, {
+            let app = app.clone();
+            move |event| {
+                let _ = app.emit(RUN_PROGRESS_EVENT, event);
+            }
+        })
+        .await;
 
     state
         .save_session(&SessionSnapshot {
@@ -70,4 +80,57 @@ pub async fn start_block_run(
         })?;
 
     Ok(report)
+}
+
+async fn collect_friend_uids(
+    client: &VrchatClient,
+    policy: &crate::models::RetryPolicy,
+) -> HashSet<String> {
+    let mut uids = HashSet::new();
+
+    collect_friend_page_group(client, policy, false, &mut uids).await;
+    collect_friend_page_group(client, policy, true, &mut uids).await;
+
+    uids
+}
+
+async fn collect_friend_page_group(
+    client: &VrchatClient,
+    policy: &crate::models::RetryPolicy,
+    offline: bool,
+    uids: &mut HashSet<String>,
+) {
+    const PAGE_SIZE: usize = 100;
+
+    let mut offset = 0;
+    loop {
+        let response = match retry_api(policy, || client.friends(offset, PAGE_SIZE, offline)).await
+        {
+            Ok((response, _attempts)) => response,
+            Err(error) => {
+                log::warn!(
+                    "failed to fetch {} friends at offset {}: {}",
+                    if offline { "offline" } else { "online" },
+                    offset,
+                    error
+                );
+                break;
+            }
+        };
+
+        let friend_count = response.value.len();
+        uids.extend(
+            response
+                .value
+                .into_iter()
+                .map(|friend| friend.id)
+                .filter(|uid| uid.starts_with("usr_")),
+        );
+
+        if friend_count < PAGE_SIZE {
+            break;
+        }
+
+        offset += PAGE_SIZE;
+    }
 }

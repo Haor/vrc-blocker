@@ -153,6 +153,14 @@ pub struct StartRunRequest {
     pub account: Option<AccountSession>,
     pub rows: Vec<ImportRow>,
     pub dry_run: bool,
+    /// 好友保护：开启后名单中是好友的条目将被跳过并标记为 SkippedFriend，不执行 block。
+    /// 默认开启（缺省为 true），以避免误屏蔽好友。
+    #[serde(default = "default_skip_friends")]
+    pub skip_friends: bool,
+}
+
+fn default_skip_friends() -> bool {
+    true
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -196,6 +204,8 @@ pub struct RunSummary {
     pub failed: usize,
     pub skipped: usize,
     pub already_blocked: usize,
+    #[serde(default)]
+    pub skipped_friend: usize,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -217,6 +227,7 @@ pub enum RunItemStatus {
     Success,
     Failed,
     Skipped,
+    SkippedFriend,
     AlreadyBlocked,
     FailedBlockAfterNote,
     FailedNoteAfterBlock,

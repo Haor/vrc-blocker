@@ -89,11 +89,16 @@ const I18N = {
     "manifest.doneBadge": "已执行 {success}/{total}",
     "manifest.fixBadge": "{count} 条需修正",
     "manifest.readyBadge": "未执行",
+    "manifest.delete": "删除名单",
+    "manifest.deleteConfirm": "删除名单「{name}」？此操作不可撤销。",
+    "manifest.deleted": "已删除名单「{name}」",
     "confirm.lead": "单账号串行执行。正常请求只加小抖动；429/5xx 按 Retry-After 或指数退避，<b>401/403 立即停止</b>。",
     "confirm.account": "账号",
     "confirm.toBlock": "将屏蔽",
     "confirm.peopleSuffix": " 人",
     "confirm.checkbox": "我确认屏蔽以上账号，并覆盖写入线上备注。",
+    "confirm.skipFriends": "跳过列表中的好友（推荐）",
+    "confirm.skipFriendsHint": "开启后，如果名单中有你的好友，将自动跳过并在报告中标记。",
     "confirm.back": "← 返回编辑",
     "confirm.start": "开始屏蔽 <span class=\"k\">↵</span>",
     "confirm.running": "执行中…",
@@ -114,6 +119,7 @@ const I18N = {
     "run.metaSuccess": "写入 + 屏蔽",
     "run.metaAlready": "已屏蔽 · 覆盖备注",
     "run.metaSkipped": "手动跳过",
+    "run.metaSkippedFriend": "好友 · 已跳过",
     "run.metaFailed": "失败",
     "run.noteUnverified": "备注未验证，已继续屏蔽",
     "report.title": "执行报告",
@@ -132,10 +138,12 @@ const I18N = {
     "report.noFailed": "没有失败条目",
     "report.jsonDone": "报告 JSON 已导出",
     "report.failedCsvDone": "失败 CSV 已导出",
+    "report.copied": "已复制",
     "status.success": "成功",
     "status.failed": "失败",
     "status.skipped": "跳过",
     "status.alreadyBlocked": "已屏蔽",
+    "status.skippedFriend": "好友跳过",
     "status.failedBlockAfterNote": "备注后屏蔽失败",
     "status.failedNoteAfterBlock": "屏蔽后备注失败",
     "history.title": "历史",
@@ -228,11 +236,16 @@ const I18N = {
     "manifest.doneBadge": "実行済み {success}/{total}",
     "manifest.fixBadge": "{count} 件要修正",
     "manifest.readyBadge": "未実行",
+    "manifest.delete": "リストを削除",
+    "manifest.deleteConfirm": "リスト「{name}」を削除しますか？この操作は取り消せません。",
+    "manifest.deleted": "リスト「{name}」を削除しました",
     "confirm.lead": "単一アカウントで直列実行します。通常リクエストは小さな揺らぎのみ、429/5xx は Retry-After または指数バックオフ、<b>401/403 は即停止</b>します。",
     "confirm.account": "アカウント",
     "confirm.toBlock": "ブロック対象",
     "confirm.peopleSuffix": " 人",
     "confirm.checkbox": "上記アカウントをブロックし、オンラインメモを上書きすることを確認します。",
+    "confirm.skipFriends": "リスト内のフレンドをスキップ（推奨）",
+    "confirm.skipFriendsHint": "オンにすると、リストにフレンドが含まれる場合は自動でスキップし、レポートに記録します。",
     "confirm.back": "← 編集へ戻る",
     "confirm.start": "ブロック開始 <span class=\"k\">↵</span>",
     "confirm.running": "実行中…",
@@ -253,6 +266,7 @@ const I18N = {
     "run.metaSuccess": "書き込み + ブロック",
     "run.metaAlready": "ブロック済み · メモ上書き",
     "run.metaSkipped": "手動スキップ",
+    "run.metaSkippedFriend": "フレンド · スキップ済み",
     "run.metaFailed": "失敗",
     "run.noteUnverified": "メモ未確認、ブロックは続行済み",
     "report.title": "実行レポート",
@@ -271,10 +285,12 @@ const I18N = {
     "report.noFailed": "失敗項目はありません",
     "report.jsonDone": "レポート JSON を出力しました",
     "report.failedCsvDone": "失敗 CSV を出力しました",
+    "report.copied": "コピーしました",
     "status.success": "成功",
     "status.failed": "失敗",
     "status.skipped": "スキップ",
     "status.alreadyBlocked": "ブロック済み",
+    "status.skippedFriend": "フレンドをスキップ",
     "status.failedBlockAfterNote": "メモ後ブロック失敗",
     "status.failedNoteAfterBlock": "ブロック後メモ失敗",
     "history.title": "履歴",
@@ -367,11 +383,16 @@ const I18N = {
     "manifest.doneBadge": "Ran {success}/{total}",
     "manifest.fixBadge": "{count} need fix",
     "manifest.readyBadge": "Not run",
+    "manifest.delete": "Delete list",
+    "manifest.deleteConfirm": "Delete list \"{name}\"? This cannot be undone.",
+    "manifest.deleted": "Deleted list \"{name}\"",
     "confirm.lead": "Runs serially on one account. Normal requests only add small jitter; 429/5xx use Retry-After or exponential backoff, and <b>401/403 stop immediately</b>.",
     "confirm.account": "Account",
     "confirm.toBlock": "To block",
     "confirm.peopleSuffix": " users",
     "confirm.checkbox": "I confirm blocking these accounts and overwriting their online notes.",
+    "confirm.skipFriends": "Skip friends in the list (recommended)",
+    "confirm.skipFriendsHint": "When on, any of your friends in the list are skipped automatically and flagged in the report.",
     "confirm.back": "← Back to edit",
     "confirm.start": "Start blocking <span class=\"k\">↵</span>",
     "confirm.running": "Running…",
@@ -392,6 +413,7 @@ const I18N = {
     "run.metaSuccess": "Write + block",
     "run.metaAlready": "Already blocked · note overwritten",
     "run.metaSkipped": "Skipped manually",
+    "run.metaSkippedFriend": "Friend · skipped",
     "run.metaFailed": "Failed",
     "run.noteUnverified": "Note not verified; block continued",
     "report.title": "Run Report",
@@ -410,10 +432,12 @@ const I18N = {
     "report.noFailed": "No failed rows",
     "report.jsonDone": "Report JSON exported",
     "report.failedCsvDone": "Failed CSV exported",
+    "report.copied": "Copied",
     "status.success": "Success",
     "status.failed": "Failed",
     "status.skipped": "Skipped",
     "status.alreadyBlocked": "Already blocked",
+    "status.skippedFriend": "Friend skipped",
     "status.failedBlockAfterNote": "Block failed after note",
     "status.failedNoteAfterBlock": "Note failed after block",
     "history.title": "History",
@@ -488,6 +512,8 @@ const STATIC_I18N = [
   ["#mfConfirm .kv dt:nth-of-type(1)", "text", "confirm.account"],
   ["#mfConfirm .kv dt:nth-of-type(2)", "text", "confirm.toBlock"],
   [".confirm-box span", "text", "confirm.checkbox"],
+  ["#skipFriendsLabel", "text", "confirm.skipFriends"],
+  ["#skipFriendsHint", "text", "confirm.skipFriendsHint"],
   ["#closeConfirmButton", "text", "confirm.back"],
   ["#startBtn", "html", "confirm.start"],
   ["#runLead", "text", "run.idle"],
@@ -784,8 +810,8 @@ async function importSelectedCsv(event) {
 async function downloadExampleCsv() {
   try {
     const csv = await call("example_csv");
-    downloadText("vrc_block_list_example.csv", csv, "text/csv;charset=utf-8");
-    toast(t("import.exampleDone"));
+    const saved = await saveFileWithDialog("vrc_block_list_example.csv", csv, "csv");
+    if (saved) toast(t("import.exampleDone"));
   } catch (error) {
     toast(errorMessage(error));
   }
@@ -807,15 +833,20 @@ function renderManifests() {
       } else {
         badge = `<span class="badge ready">${escapeHtml(t("manifest.readyBadge"))}</span>`;
       }
-      const d = document.createElement("button");
-      d.type = "button";
+      const d = document.createElement("div");
       d.className = "mfcard";
       d.innerHTML =
-        `<div class="ic ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="5.6" y1="5.6" x2="18.4" y2="18.4"/></svg></div>
-        <div class="info"><div class="nm">${escapeHtml(m.name)}</div>
-          <div class="meta">${escapeHtml(t("manifest.listMeta", { count: m.rows.length, date: formatDate(m.importedAt) }))}</div></div>
-        ${badge}<div class="arr">›</div>`;
-      d.onclick = () => openManifest(m.id);
+        `<button type="button" class="mfcard-open">
+          <div class="ic ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="5.6" y1="5.6" x2="18.4" y2="18.4"/></svg></div>
+          <div class="info"><div class="nm">${escapeHtml(m.name)}</div>
+            <div class="meta">${escapeHtml(t("manifest.listMeta", { count: m.rows.length, date: formatDate(m.importedAt) }))}</div></div>
+          ${badge}<div class="arr">›</div>
+        </button>
+        <button type="button" class="mfcard-del iconbtn danger" title="${escapeHtml(t("manifest.delete"))}" aria-label="${escapeHtml(t("manifest.delete"))}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>`;
+      d.querySelector(".mfcard-open").onclick = () => openManifest(m.id);
+      d.querySelector(".mfcard-del").onclick = (e) => { e.stopPropagation(); deleteManifest(m.id); };
       box.appendChild(d);
     });
   }
@@ -826,6 +857,21 @@ function renderManifests() {
   $("#stMf").textContent = state.manifests.length;
   $("#stPending").textContent = pending;
   $("#stBlocked").textContent = blocked;
+}
+
+function deleteManifest(id) {
+  const m = state.manifests.find((item) => item.id === id);
+  if (!m) return;
+  if (!confirm(t("manifest.deleteConfirm", { name: m.name }))) return;
+
+  state.manifests = state.manifests.filter((item) => item.id !== id);
+  if (state.activeManifestId === id) {
+    state.activeManifestId = null;
+    state.selectedRowIndex = 0;
+  }
+  saveManifests();
+  renderManifests();
+  toast(t("manifest.deleted", { name: m.name }));
 }
 
 function loadManifests() {
@@ -1058,6 +1104,7 @@ async function startRun() {
         account: state.session,
         rows: m.rows,
         dryRun: false,
+        skipFriends: $("#skipFriendsChk")?.checked ?? true,
       },
     });
   } catch (error) {
@@ -1281,7 +1328,7 @@ function finishRun(report) {
   renderHistory();
 }
 
-const TLP = { start: "START", written: "WRITTEN", overwrite: "OVERWRITE", backoff: "BACKOFF", done: "DONE", info: "INFO", failed: "FAILED", skipped: "SKIPPED" };
+const TLP = { start: "START", written: "WRITTEN", overwrite: "OVERWRITE", backoff: "BACKOFF", done: "DONE", info: "INFO", failed: "FAILED", skipped: "SKIPPED", friend: "FRIEND" };
 function log(stage, uid, txt) {
   const t = $("#term");
   const ln = document.createElement("div");
@@ -1298,6 +1345,7 @@ function runItemMeta(status) {
     case "success": return { bucket: "ok", stage: "written", label: t("run.metaSuccess") };
     case "already_blocked": return { bucket: "ok", stage: "overwrite", label: t("run.metaAlready") };
     case "skipped": return { bucket: "skip", stage: "skipped", label: t("run.metaSkipped") };
+    case "skipped_friend": return { bucket: "skip", stage: "friend", label: t("run.metaSkippedFriend") };
     case "failed":
     case "failed_block_after_note":
     case "failed_note_after_block":
@@ -1351,12 +1399,34 @@ function openReport(origin = "import") {
     const detail = reportDetail(it);
     const tr = document.createElement("tr");
     tr.innerHTML =
-      `<td class="mono">${escapeHtml(shortUid(it.uid))}</td>` +
+      `<td><button type="button" class="uid-copy mono" title="${escapeHtml(it.uid)}">${escapeHtml(shortUid(it.uid))}</button></td>` +
       `<td><span class="rstatus ${st.className}">${st.label}</span></td>` +
       `<td class="num">${http}</td><td>${escapeHtml(detail)}</td>`;
+    tr.querySelector(".uid-copy").addEventListener("click", () => copyUid(it.uid));
     tb.appendChild(tr);
   });
   go("report");
+}
+
+async function copyUid(uid) {
+  if (!uid) return;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(uid);
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = uid;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+    toast(t("report.copied"));
+  } catch (error) {
+    toast(errorMessage(error));
+  }
 }
 
 function reportDetail(item) {
@@ -1368,31 +1438,40 @@ function reportStatus(status) {
     success: { label: t("status.success"), className: "ok" },
     failed: { label: t("status.failed"), className: "bad" },
     skipped: { label: t("status.skipped"), className: "skip" },
+    skipped_friend: { label: t("status.skippedFriend"), className: "friend" },
     already_blocked: { label: t("status.alreadyBlocked"), className: "warn" },
     failed_block_after_note: { label: t("status.failedBlockAfterNote"), className: "bad" },
     failed_note_after_block: { label: t("status.failedNoteAfterBlock"), className: "bad" },
   }[status] || { label: status, className: "skip" };
 }
 
-function exportReportJson() {
+async function exportReportJson() {
   if (!state.report) { toast(t("report.noneExport")); return; }
-  downloadText(
-    `${safeFileStem(state.reportManifestName || "vrc-blocker-report")}.json`,
-    `${JSON.stringify(state.report, null, 2)}\n`,
-    "application/json;charset=utf-8",
-  );
-  toast(t("report.jsonDone"));
+  try {
+    const saved = await saveFileWithDialog(
+      `${safeFileStem(state.reportManifestName || "vrc-blocker-report")}.json`,
+      `${JSON.stringify(state.report, null, 2)}\n`,
+      "json",
+    );
+    if (saved) toast(t("report.jsonDone"));
+  } catch (error) {
+    toast(errorMessage(error));
+  }
 }
 
-function exportFailedCsv() {
+async function exportFailedCsv() {
   if (!state.report) { toast(t("report.noneExport")); return; }
-  const failed = state.report.items.filter((it) => !["success", "already_blocked", "skipped"].includes(it.status));
+  const failed = state.report.items.filter((it) => !["success", "already_blocked", "skipped", "skipped_friend"].includes(it.status));
   if (failed.length === 0) { toast(t("report.noFailed")); return; }
   const csv = ["uid,memo,error"]
     .concat(failed.map((it) => [it.uid, it.memo, it.error || ""].map(csvCell).join(",")))
     .join("\n");
-  downloadText(`${safeFileStem(state.reportManifestName || "failed")}_failed.csv`, `${csv}\n`, "text/csv;charset=utf-8");
-  toast(t("report.failedCsvDone"));
+  try {
+    const saved = await saveFileWithDialog(`${safeFileStem(state.reportManifestName || "failed")}_failed.csv`, `${csv}\n`, "csv");
+    if (saved) toast(t("report.failedCsvDone"));
+  } catch (error) {
+    toast(errorMessage(error));
+  }
 }
 
 /* ---------------- history ---------------- */
@@ -1632,6 +1711,31 @@ function downloadText(filename, text, type) {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+/**
+ * 弹出系统“保存文件”对话框让用户选择保存位置。
+ * 桌面端走后端 save_text_file 命令；浏览器预览回退到 Blob 下载。
+ * 返回 true 表示已写入，false 表示用户取消。
+ */
+async function saveFileWithDialog(defaultName, content, kind) {
+  const filter = kind === "json"
+    ? { name: "JSON", ext: "json" }
+    : { name: "CSV", ext: "csv" };
+
+  if (!invoke) {
+    const type = kind === "json" ? "application/json;charset=utf-8" : "text/csv;charset=utf-8";
+    downloadText(defaultName, content, type);
+    return true;
+  }
+
+  const savedPath = await call("save_text_file", {
+    defaultName,
+    content,
+    filterName: filter.name,
+    filterExt: filter.ext,
+  });
+  return savedPath !== null && savedPath !== undefined;
 }
 
 function csvCell(value) {

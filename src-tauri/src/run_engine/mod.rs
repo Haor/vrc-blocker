@@ -94,6 +94,7 @@ pub async fn execute_block_run<F>(
     request: StartRunRequest,
     client: &VrchatClient,
     policy: &RetryPolicy,
+    friend_uids: &HashSet<String>,
     mut on_progress: F,
 ) -> RunReport
 where
@@ -103,6 +104,7 @@ where
         return build_scaffold_report(request);
     }
 
+    let skip_friends = request.skip_friends;
     let started_at = now_rfc3339();
     let run_id = Uuid::new_v4().to_string();
     let manifest_name = request.manifest_name.clone();
@@ -147,6 +149,23 @@ where
                 block: None,
                 attempts: 0,
                 error: None,
+            };
+            on_progress(item_event(&run_id, total, items.len() + 1, item.clone()));
+            items.push(item);
+            continue;
+        }
+
+        // 好友保护：开启时，名单中是好友的条目跳过并标记，不执行 block。
+        if skip_friends && friend_uids.contains(&row.uid) {
+            let item = RunItemResult {
+                row_index: row.row_index,
+                uid: row.uid,
+                memo: row.normalized_memo,
+                status: RunItemStatus::SkippedFriend,
+                note: None,
+                block: None,
+                attempts: 0,
+                error: Some("已跳过：该用户是你的好友".to_string()),
             };
             on_progress(item_event(&run_id, total, items.len() + 1, item.clone()));
             items.push(item);
@@ -446,7 +465,7 @@ async fn verify_block_after_post(
     }
 }
 
-async fn retry_api<T, Fut, F>(
+pub(crate) async fn retry_api<T, Fut, F>(
     policy: &RetryPolicy,
     mut operation: F,
 ) -> Result<(ApiResponse<T>, u32), crate::error::AppError>
@@ -606,6 +625,10 @@ fn summarize_items(items: &[RunItemResult]) -> RunSummary {
                 summary.already_blocked += 1;
             }
             RunItemStatus::Skipped => summary.skipped += 1,
+            RunItemStatus::SkippedFriend => {
+                summary.skipped += 1;
+                summary.skipped_friend += 1;
+            }
             RunItemStatus::Failed
             | RunItemStatus::FailedBlockAfterNote
             | RunItemStatus::FailedNoteAfterBlock => summary.failed += 1,
@@ -705,6 +728,26 @@ mod tests {
         assert_eq!(summary.total, 1);
         assert_eq!(summary.success, 1);
         assert_eq!(summary.failed, 0);
+    }
+
+    #[test]
+    fn summarizes_skipped_friend_as_skipped() {
+        let summary = summarize_items(&[RunItemResult {
+            row_index: 1,
+            uid: "usr_00000000-0000-4000-8000-000000000001".to_string(),
+            memo: "memo".to_string(),
+            status: RunItemStatus::SkippedFriend,
+            note: None,
+            block: None,
+            attempts: 0,
+            error: Some("已跳过：该用户是你的好友".to_string()),
+        }]);
+
+        assert_eq!(summary.total, 1);
+        assert_eq!(summary.success, 0);
+        assert_eq!(summary.failed, 0);
+        assert_eq!(summary.skipped, 1);
+        assert_eq!(summary.skipped_friend, 1);
     }
 
     #[test]

@@ -231,6 +231,14 @@ textarea{resize:vertical;min-height:104px;line-height:1.6;}
 .mfcard .info .meta{font-size:12px;color:var(--muted);margin-top:3px;}
 .mfcard .arr{color:var(--muted-soft);font-size:16px;}
 
+/* 名单卡片：可打开区 + 删除按钮（删除按钮 hover 才显形，避免误触） */
+.mfcard:has(.mfcard-del){padding:0;gap:0;cursor:default;}
+.mfcard-open{flex:1;min-width:0;display:flex;align-items:center;gap:15px;padding:14px 16px;cursor:pointer;
+  appearance:none;background:none;border:none;text-align:left;font-family:var(--sans);}
+.mfcard-del{flex:none;margin-right:12px;opacity:0;transition:opacity .12s,background .12s,color .12s;}
+.mfcard:hover .mfcard-del{opacity:1;}
+.mfcard-del:focus-visible{opacity:1;}
+
 /* ================================ EDIT ================================== */
 .editor{display:grid;grid-template-columns:1fr;gap:14px;min-height:440px;}
 @media(min-width:880px){.editor{grid-template-columns:320px 1fr;}}
@@ -272,6 +280,13 @@ textarea{resize:vertical;min-height:104px;line-height:1.6;}
   display:flex;gap:11px;align-items:flex-start;font-size:13px;color:#9a2440;font-weight:500;cursor:pointer;margin-top:16px;}
 .confirm-box input{accent-color:var(--error);margin-top:2px;width:auto;}
 
+/* 可选项（好友保护等）：中性色卡片，区别于红色确认框 */
+.opt-box{border:1px solid var(--hairline);background:var(--canvas-soft);border-radius:var(--r-lg);padding:13px 14px;
+  display:flex;gap:11px;align-items:center;font-size:13px;color:var(--body);cursor:pointer;margin-top:10px;}
+.opt-box input{accent-color:var(--primary);width:auto;flex:none;}
+.opt-box .opt-title{display:block;font-weight:600;color:var(--ink);}
+.opt-box .opt-hint{display:block;margin-top:3px;font-size:12px;color:var(--muted);line-height:1.5;}
+
 /* ================================= RUN ================================== */
 .proghead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
 .bar{height:10px;background:var(--surface-strong);border-radius:var(--r-pill);overflow:hidden;}
@@ -295,6 +310,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.6;}
 .tlp.info{background:var(--surface-strong);color:var(--ink);}
 .tlp.failed{background:var(--error-soft);color:var(--error);}
 .tlp.skipped{background:var(--surface-strong);color:var(--muted);}
+.tlp.friend{background:var(--gold-soft);color:#6e4f1c;}
 
 /* =============================== HISTORY ================================ */
 table.tb{width:100%;border-collapse:collapse;font-size:13px;}
@@ -304,6 +320,13 @@ table.tb td{padding:12px 14px;border-bottom:1px solid var(--hairline-soft);color
 table.tb tr:last-child td{border-bottom:none;}
 table.tb tr:hover td{background:var(--canvas-soft);}
 .num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);}
+
+/* UID 点击复制：外观保持等宽文本，仅 hover 暗示可点击 */
+.uid-copy{appearance:none;border:none;background:none;padding:2px 4px;margin:-2px -4px;cursor:pointer;
+  font-family:var(--mono);font-size:13px;color:var(--ink);border-radius:var(--r-xs);
+  transition:background .12s,color .12s;}
+.uid-copy:hover{background:var(--primary-soft);color:var(--primary);}
+.uid-copy:active{transform:translateY(1px);}
 
 .report-list-card{flex:1;min-height:0;padding:0;overflow:hidden;display:flex;flex-direction:column;}
 .report-table-scroll{flex:1;min-height:0;overflow:auto;}
@@ -356,6 +379,7 @@ table.tb tr:hover td{background:var(--canvas-soft);}
 .rstatus.bad{color:var(--error);background:var(--error-soft);}
 .rstatus.skip{color:var(--muted);background:var(--surface-strong);}
 .rstatus.warn{color:#6e4f1c;background:var(--gold-soft);}
+.rstatus.friend{color:#6e4f1c;background:var(--gold-soft);}
 
 /* component motion */
 .btn:active{transform:translateY(1px);}

@@ -2,6 +2,7 @@ use crate::error::{AppError, AppResult};
 use crate::models::{ProxyConfig, ProxyMode};
 use crate::session::StoredCookie;
 use crate::vrchat::auth::{encode_vrchat_basic_auth_credential, AuthUserResponse};
+use crate::vrchat::friends::Friend;
 use crate::vrchat::moderation::{PlayerModeration, PlayerModerationRequest};
 use crate::vrchat::notes::{UserNoteRequest, UserNoteResponse};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, COOKIE, RETRY_AFTER, SET_COOKIE};
@@ -126,6 +127,18 @@ impl VrchatClient {
         n: usize,
     ) -> AppResult<ApiResponse<Vec<UserNoteResponse>>> {
         self.get(&format!("userNotes?offset={offset}&n={n}")).await
+    }
+
+    pub async fn friends(
+        &self,
+        offset: usize,
+        n: usize,
+        offline: bool,
+    ) -> AppResult<ApiResponse<Vec<Friend>>> {
+        self.get(&format!(
+            "auth/user/friends?offline={offline}&n={n}&offset={offset}"
+        ))
+        .await
     }
 
     pub async fn block_user(&self, uid: String) -> AppResult<ApiResponse<PlayerModeration>> {

@@ -1,6 +1,6 @@
 [package]
 name = "vrc-blocker"
-version = "0.1.0"
+version = "0.2.0"
 description = "A small VRChat block-list importer with online userNotes support"
 authors = ["harukishiina"]
 license = ""
@@ -31,3 +31,4 @@ time = { version = "0.3", features = ["formatting", "macros"] }
 tokio = { version = "1.38", features = ["macros", "rt-multi-thread", "time"] }
 url = "2.5"
 uuid = { version = "1.8", features = ["serde", "v4"] }
+tauri-plugin-dialog = "2.7.1"

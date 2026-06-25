@@ -37,7 +37,7 @@
         </svg>
       </span>
       <span data-tauri-drag-region>vrc-blocker</span>
-      <span class="wv" data-tauri-drag-region>v0.1.0</span>
+      <span class="wv" data-tauri-drag-region>v0.2.0</span>
     </div>
   </div>
 
@@ -74,7 +74,7 @@
 
     <div class="side-foot">
       <button class="sf-link" id="openSettings">语言</button>
-      <div class="sf-ver">vrc-blocker · v0.1.0</div>
+      <div class="sf-ver">vrc-blocker · v0.2.0</div>
     </div>
   </aside>
 
@@ -157,6 +157,13 @@
           <label class="confirm-box">
             <input type="checkbox" id="chk">
             <span>我确认屏蔽以上账号，并覆盖写入线上备注。</span>
+          </label>
+          <label class="opt-box" id="skipFriendsBox">
+            <input type="checkbox" id="skipFriendsChk" checked>
+            <span>
+              <span class="opt-title" id="skipFriendsLabel">跳过列表中的好友（推荐）</span>
+              <span class="opt-hint" id="skipFriendsHint">开启后，如果名单中有你的好友，将自动跳过并在报告中标记。</span>
+            </span>
           </label>
           <div class="btnrow">
             <button class="btn ghost" id="closeConfirmButton">← 返回编辑</button>
